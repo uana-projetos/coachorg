@@ -691,23 +691,60 @@ body {
   <div id="paymentsList"></div>
 </div>
 
-<!-- PAGE: SETTINGS -->
+<!-- PAGE: SETTINGS / COACH IA -->
 <div class="page" id="pageSettings">
-  <div class="section-title">Configurações</div>
-  <div class="card">
-    <div class="config-item">
-      <div>
-        <div class="config-label">Notificações de Pagamento</div>
-        <div class="config-desc">Lembrete 3 dias antes do vencimento</div>
+
+  <!-- COACH IA HEADER -->
+  <div style="background:linear-gradient(135deg,var(--accent2),#2a0a1e);border-radius:20px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,82,82,.1);border-radius:50%"></div>
+    <div style="font-size:11px;color:#ff525280;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">✦ Inteligência Artificial</div>
+    <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Coach IA</div>
+    <div style="font-size:13px;color:#ffffff80">Análise automática do seu negócio</div>
+  </div>
+
+  <!-- META FINANCEIRA -->
+  <div class="section-title">Meta Financeira do Mês</div>
+  <div class="card" id="financialGoalCard">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Sua meta mensal (R$)</div>
+        <input type="number" id="monthlyGoalInput" placeholder="Ex: 3000" min="0"
+          style="width:100%;background:var(--bg);border:1.5px solid #ffffff15;border-radius:12px;color:var(--text);padding:10px 14px;font-size:18px;font-weight:700"
+          oninput="saveMonthlyGoal(this.value)">
       </div>
-      <button class="toggle on" id="togglePayNotif" onclick="toggleSetting('payNotif')"></button>
+    </div>
+    <div id="goalProgressSection"></div>
+  </div>
+
+  <!-- INSIGHTS IA -->
+  <div class="section-title">Insights do Coach IA</div>
+  <div id="aiInsightsContainer">
+    <div class="empty-state"><p>Carregando análise...</p></div>
+  </div>
+
+  <!-- NOTIFICAÇÕES PUSH -->
+  <div class="section-title">Lembretes Automáticos</div>
+  <div class="card">
+    <div style="text-align:center;padding:8px 0 16px">
+      <div style="font-size:32px;margin-bottom:8px">🔔</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Notificações no celular</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Receba alertas de treino e pagamento mesmo com o app fechado</div>
+      <button class="btn btn-primary" onclick="requestPushPermission()" style="width:auto;padding:10px 24px" id="pushBtn">Ativar Notificações</button>
+      <div id="pushStatus" style="font-size:11px;color:var(--text2);margin-top:8px"></div>
+    </div>
+    <div class="config-item" style="border-top:1px solid #ffffff10;padding-top:14px">
+      <div>
+        <div class="config-label">Lembrete de Treino</div>
+        <div class="config-desc">1h antes do horário da aula</div>
+      </div>
+      <button class="toggle on" id="toggleTrainNotif" onclick="toggleSetting('trainNotif')"></button>
     </div>
     <div class="config-item">
       <div>
-        <div class="config-label">Lembrete de Treino</div>
-        <div class="config-desc">Notificar 1h antes do treino</div>
+        <div class="config-label">Lembrete de Pagamento</div>
+        <div class="config-desc">3 dias antes do vencimento</div>
       </div>
-      <button class="toggle on" id="toggleTrainNotif" onclick="toggleSetting('trainNotif')"></button>
+      <button class="toggle on" id="togglePayNotif" onclick="toggleSetting('payNotif')"></button>
     </div>
     <div class="config-item">
       <div>
@@ -718,6 +755,7 @@ body {
     </div>
   </div>
 
+  <!-- WHATSAPP -->
   <div class="section-title">WhatsApp Automático</div>
   <div class="card">
     <div class="config-item">
@@ -752,6 +790,7 @@ body {
     </div>
   </div>
 
+  <!-- DADOS -->
   <div class="section-title">Dados</div>
   <div class="card">
     <div class="config-item">
@@ -773,7 +812,7 @@ body {
 
   <div class="section-title" style="margin-top:30px">Sobre</div>
   <div class="card" style="text-align:center">
-    <p style="font-size:13px;color:var(--text2)">CoachOrg v2.0<br>App completo para Personal Trainers<br><span style="font-size:11px">WhatsApp + Email + Agenda + Pagamentos</span></p>
+    <p style="font-size:13px;color:var(--text2)">CoachOrg v3.0 Pro<br>App completo para Personal Trainers<br><span style="font-size:11px">IA + WhatsApp + Agenda + Financeiro</span></p>
   </div>
 </div>
 
@@ -841,8 +880,8 @@ body {
     Pagamentos
   </button>
   <button class="tab-btn" onclick="showPage('settings')" data-page="settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    Config
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"/><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+    Coach IA
   </button>
 </div>
 
@@ -1056,6 +1095,7 @@ function showPage(name) {
   if(name==='students') renderStudents();
   if(name==='schedule') renderSchedule();
   if(name==='payments') renderPayments();
+  if(name==='settings') renderCoachIA();
 }
 
 // HOME
@@ -2037,6 +2077,237 @@ requestNotifPermission();
     setTimeout(() => splash.remove(), 650);
   }, 2400);
 })();
+
+// ==================== COACH IA ====================
+
+let monthlyGoal = parseFloat(localStorage.getItem('coachorg_goal')) || 0;
+
+function saveMonthlyGoal(v) {
+  monthlyGoal = parseFloat(v) || 0;
+  localStorage.setItem('coachorg_goal', monthlyGoal);
+  renderGoalProgress();
+}
+
+function renderGoalProgress() {
+  const el = document.getElementById('goalProgressSection');
+  const inp = document.getElementById('monthlyGoalInput');
+  if(inp && !inp.value && monthlyGoal) inp.value = monthlyGoal;
+  if(!el) return;
+  const received = students.filter(s=>isPaymentDone(s.id)).reduce((sum,s)=>sum+(parseFloat(s.value)||0),0);
+  const pending = students.filter(s=>!isPaymentDone(s.id)).reduce((sum,s)=>sum+(parseFloat(s.value)||0),0);
+  const projected = received + pending;
+  if(!monthlyGoal) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text2);text-align:center;padding:4px 0">Digite sua meta acima para ver o progresso</div>';
+    return;
+  }
+  const pct = Math.min(100, Math.round(received / monthlyGoal * 100));
+  const color = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--yellow)' : 'var(--accent)';
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;text-align:center">
+      <div style="background:var(--bg);border-radius:12px;padding:10px">
+        <div style="font-size:18px;font-weight:800;color:var(--green)">R$${received.toFixed(0)}</div>
+        <div style="font-size:10px;color:var(--text2)">Recebido</div>
+      </div>
+      <div style="background:var(--bg);border-radius:12px;padding:10px">
+        <div style="font-size:18px;font-weight:800;color:var(--orange)">R$${pending.toFixed(0)}</div>
+        <div style="font-size:10px;color:var(--text2)">Pendente</div>
+      </div>
+      <div style="background:var(--bg);border-radius:12px;padding:10px">
+        <div style="font-size:18px;font-weight:800;color:var(--accent)">R$${monthlyGoal.toFixed(0)}</div>
+        <div style="font-size:10px;color:var(--text2)">Meta</div>
+      </div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;height:10px;overflow:hidden;margin-bottom:6px">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:8px;transition:.6s"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2)">
+      <span style="color:${color};font-weight:700">${pct}% da meta atingida</span>
+      ${projected >= monthlyGoal
+        ? '<span style="color:var(--green)">✓ Meta possível de bater!</span>'
+        : `<span>Faltam R$${(monthlyGoal-projected).toFixed(0)} pra fechar</span>`}
+    </div>`;
+}
+
+function generateInsights() {
+  const insights = [];
+  const today = new Date();
+  const dow = today.getDay();
+  const todayKey = today.toISOString().slice(0,10);
+
+  if(students.length === 0) {
+    insights.push({icon:'👋', title:'Bem-vindo ao CoachOrg!', desc:'Cadastre seu primeiro aluno na aba Alunos para começar a receber insights.', color:'#5b8cff', priority:0});
+    return insights;
+  }
+
+  // Alunos sem pagamento vencido
+  const overdue = students.filter(s=>!isPaymentDone(s.id) && daysUntilPayment(s.payDay)<=0);
+  if(overdue.length > 0) {
+    insights.push({
+      icon:'⚠️', priority:3,
+      title:`${overdue.length} pagamento${overdue.length>1?'s':''} vencido${overdue.length>1?'s':''}`,
+      desc:`${overdue.map(s=>`${s.name} (R$${s.value||'?'})`).join(', ')} — cobrar agora!`,
+      color:'var(--accent)', action:`openWaModal('${overdue[0].id}')`, actionLabel:'Cobrar via WA'
+    });
+  }
+
+  // Alunos que não apareceram hoje
+  const todayStudents = students.filter(s=>s.days&&s.days.includes(dow));
+  const absentToday = todayStudents.filter(s=>{
+    const now = today.getHours()*60+today.getMinutes();
+    const [h,m] = (s.time||'06:00').split(':').map(Number);
+    return (h*60+m) < now && !attendance[todayKey+'_'+s.id];
+  });
+  if(absentToday.length > 0) {
+    insights.push({
+      icon:'🔴', priority:3,
+      title:`${absentToday.length} aluno${absentToday.length>1?'s':''} faltou hoje`,
+      desc:absentToday.map(s=>s.name).join(', ')+' — horário de treino passou sem check-in.',
+      color:'var(--accent)'
+    });
+  }
+
+  // Dia mais cheio
+  const dayCounts = [0,1,2,3,4,5,6].map(i=>({day:i,count:students.filter(s=>s.days&&s.days.includes(i)).length}));
+  const busiest = dayCounts.reduce((a,b)=>b.count>a.count?b:a, dayCounts[0]);
+  if(busiest.count >= 4) {
+    insights.push({
+      icon:'📅', priority:1,
+      title:`${DAYS_SHORT[busiest.day]} é seu dia mais cheio`,
+      desc:`${busiest.count} alunos agendados. Considere distribuir melhor sua semana.`,
+      color:'var(--orange)'
+    });
+  }
+
+  // Dia sem alunos (dias úteis)
+  const emptyDays = [1,2,3,4,5].filter(i=>dayCounts[i].count===0);
+  if(emptyDays.length > 0 && students.length >= 3) {
+    insights.push({
+      icon:'📆', priority:1,
+      title:`${emptyDays.map(i=>DAYS_SHORT[i]).join(', ')} sem treinos`,
+      desc:'Você pode encaixar novos alunos nesses dias para aumentar a receita.',
+      color:'var(--yellow)'
+    });
+  }
+
+  // Alunos sem telefone
+  const noPhone = students.filter(s=>!s.phone);
+  if(noPhone.length > 0) {
+    insights.push({
+      icon:'📱', priority:2,
+      title:`${noPhone.length} aluno${noPhone.length>1?'s':''} sem WhatsApp cadastrado`,
+      desc:noPhone.map(s=>s.name).join(', ')+' — sem telefone você não consegue enviar lembretes.',
+      color:'var(--yellow)'
+    });
+  }
+
+  // Streak — aluno com 100% na semana
+  const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate()-dow);
+  const stars = students.filter(s=>{
+    if(!s.days||s.days.length===0) return false;
+    const trainDaysThisWeek = [0,1,2,3,4,5,6].filter(i=>{
+      if(!s.days.includes(i)) return false;
+      const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
+      if(d > today) return false;
+      return true;
+    });
+    if(trainDaysThisWeek.length===0) return false;
+    return trainDaysThisWeek.every(i=>{
+      const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
+      return attendance[d.toISOString().slice(0,10)+'_'+s.id];
+    });
+  });
+  if(stars.length > 0) {
+    insights.push({
+      icon:'🏆', priority:0,
+      title:`${stars.map(s=>s.name.split(' ')[0]).join(', ')} ${stars.length>1?'têm':'tem'} presença perfeita esta semana!`,
+      desc:'Mande uma mensagem de parabéns — reconhecimento aumenta a retenção do aluno.',
+      color:'var(--green)'
+    });
+  }
+
+  // Meta financeira
+  if(monthlyGoal > 0) {
+    const received = students.filter(s=>isPaymentDone(s.id)).reduce((sum,s)=>sum+(parseFloat(s.value)||0),0);
+    const pct = Math.round(received/monthlyGoal*100);
+    if(pct >= 100) {
+      insights.push({icon:'💰',priority:0,title:'Meta do mês batida! 🎉',desc:`Você já recebeu R$${received.toFixed(0)} — acima da sua meta de R$${monthlyGoal.toFixed(0)}. Parabéns!`,color:'var(--green)'});
+    } else if(pct < 50) {
+      const needed = students.filter(s=>!isPaymentDone(s.id)).length;
+      insights.push({icon:'💸',priority:2,title:`${pct}% da meta financeira`,desc:`Receba ${needed} pagamentos pendentes para acelerar: +R$${students.filter(s=>!isPaymentDone(s.id)).reduce((sum,s)=>sum+(parseFloat(s.value)||0),0).toFixed(0)} possíveis.`,color:'var(--yellow)'});
+    }
+  }
+
+  // Potencial de crescimento
+  if(students.length < 10) {
+    const slots = [1,2,3,4,5].reduce((sum,i)=>sum+(dayCounts[i].count<5?5-dayCounts[i].count:0),0);
+    insights.push({
+      icon:'📈', priority:0,
+      title:`Você tem espaço para ${Math.min(slots,15)} novos alunos`,
+      desc:`Com ${students.length} alunos ativos, ainda há capacidade na sua agenda. Divulgue o app e cresça!`,
+      color:'#5b8cff'
+    });
+  }
+
+  return insights.sort((a,b)=>b.priority-a.priority);
+}
+
+function renderCoachIA() {
+  // Populate goal
+  const inp = document.getElementById('monthlyGoalInput');
+  if(inp) inp.value = monthlyGoal || '';
+  renderGoalProgress();
+
+  // Push button state
+  const pushBtn = document.getElementById('pushBtn');
+  const pushStatus = document.getElementById('pushStatus');
+  if(pushBtn && 'Notification' in window) {
+    if(Notification.permission === 'granted') {
+      pushBtn.textContent = '✓ Notificações Ativas';
+      pushBtn.style.background = 'var(--green)';
+      if(pushStatus) pushStatus.textContent = 'Você vai receber lembretes automáticos no celular.';
+    } else if(Notification.permission === 'denied') {
+      pushBtn.textContent = 'Bloqueado — Habilitar nas Configs';
+      pushBtn.style.opacity = '.5';
+      if(pushStatus) pushStatus.textContent = 'Notificações bloqueadas. Abra as configurações do browser para permitir.';
+    }
+  } else if(pushBtn) {
+    pushBtn.textContent = 'Não suportado neste browser';
+    pushBtn.style.opacity = '.5';
+  }
+
+  // Render insights
+  const container = document.getElementById('aiInsightsContainer');
+  if(!container) return;
+  const insights = generateInsights();
+  if(insights.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>Tudo em ordem! Continue assim 💪</p></div>';
+    return;
+  }
+  container.innerHTML = insights.map(ins=>`
+    <div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:10px;border-left:4px solid ${ins.color};display:flex;gap:12px;align-items:flex-start">
+      <div style="font-size:28px;line-height:1">${ins.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text)">${ins.title}</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.4">${ins.desc}</div>
+        ${ins.action?`<button onclick="${ins.action}" style="margin-top:8px;background:${ins.color}20;color:${ins.color};border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">${ins.actionLabel}</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function requestPushPermission() {
+  if(!('Notification' in window)) { showToast('Notificações não suportadas neste browser'); return; }
+  Notification.requestPermission().then(perm=>{
+    if(perm==='granted') {
+      showToast('✅ Notificações ativadas!');
+      new Notification('CoachOrg ativado! 🏋️', {body:'Você vai receber lembretes de treino e pagamento.', icon:'/favicon.ico'});
+      renderCoachIA();
+    } else {
+      showToast('Notificações negadas. Ative nas configurações do browser.');
+    }
+  });
+}
+
+// ==================== END COACH IA ====================
 
 renderHome();
 updateAdBanner();
