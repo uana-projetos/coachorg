@@ -1138,68 +1138,67 @@ body {
   <div class="upgrade-sheet" style="max-height:92vh;overflow-y:auto">
 
     <!-- Promo Banner -->
-    <div style="background:linear-gradient(90deg,#ff5252,#ff6d00);border-radius:14px;padding:12px;margin-bottom:16px;text-align:center;animation:pulseGlow 2s infinite">
-      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#fff;text-transform:uppercase">🔥 PROMOÇÃO DE LANÇAMENTO</div>
-      <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px">Apenas <span id="vipSlotsLeft">47</span> vagas vitalícias restantes!</div>
-      <div style="font-size:11px;color:#ffffffcc;margin-top:2px" id="promoTimer">⏰ Termina em 7 dias</div>
+    <div style="background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:14px;padding:12px;margin-bottom:16px;text-align:center;animation:pulseGlow 2s infinite">
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#0f0f1a;text-transform:uppercase">⚡ OFERTA DE LANÇAMENTO</div>
+      <div style="font-size:14px;font-weight:800;color:#0f0f1a;margin-top:2px">PRO Anual com <span id="vipSlotsLeft">45%</span> de desconto</div>
+      <div style="font-size:11px;color:#0f0f1acc;margin-top:2px" id="promoTimer">⏰ Termina em 7 dias</div>
     </div>
 
     <div style="text-align:center;font-size:24px;margin-bottom:6px">🚀</div>
     <h2 style="text-align:center;margin-bottom:4px">Desbloqueie o CoachOrg Pro</h2>
     <p style="text-align:center;margin-bottom:18px;font-size:13px">Escolha o plano ideal pra você:</p>
 
-    <!-- PLANO 1: MENSAL -->
-    <div class="plan-card" onclick="selectPlan('mensal')" data-plan="mensal">
-      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
+    <!-- PLANO 1: MENSAL (caro de propósito) -->
+    <div class="plan-card" onclick="selectPlan('mensal')" data-plan="mensal" style="opacity:.85">
+      <div style="display:flex;justify-content:space-between;align-items:start">
         <div>
           <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.5px">PRO MENSAL</div>
-          <div style="font-size:20px;font-weight:800">R$9,90<span style="font-size:12px;color:var(--text2);font-weight:500">/mês</span></div>
-          <div style="font-size:11px;color:var(--green);font-weight:700">🎁 30 dias GRÁTIS</div>
+          <div style="font-size:20px;font-weight:800">R$14,90<span style="font-size:12px;color:var(--text2);font-weight:500">/mês</span></div>
+          <div style="font-size:11px;color:var(--text2)">Total em 1 ano: <span style="color:var(--accent);font-weight:700">R$178,80</span></div>
         </div>
-        <div style="font-size:10px;color:var(--text2);text-align:right">Menos de<br><strong style="color:var(--text);font-size:13px">R$0,33/dia</strong></div>
+        <div style="font-size:10px;color:var(--text3);text-align:right">Você paga<br><strong style="color:var(--accent);font-size:11px">R$80 a mais/ano</strong></div>
       </div>
     </div>
 
-    <!-- PLANO 2: ANUAL (DESTAQUE) -->
-    <div class="plan-card recommended" onclick="selectPlan('anual')" data-plan="anual">
-      <div style="position:absolute;top:-8px;right:14px;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:8px;letter-spacing:.5px">MAIS POPULAR</div>
-      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
+    <!-- PLANO 2: TRIMESTRAL (entrada) -->
+    <div class="plan-card" onclick="selectPlan('trimestral')" data-plan="trimestral" style="opacity:.92">
+      <div style="display:flex;justify-content:space-between;align-items:start">
         <div>
-          <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:.5px">PRO ANUAL</div>
-          <div style="font-size:20px;font-weight:800">R$79<span style="font-size:12px;color:var(--text2);font-weight:500">/ano</span></div>
-          <div style="font-size:11px;color:var(--green);font-weight:700">💰 Economize R$40 (33% off)</div>
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.5px">PRO TRIMESTRAL</div>
+          <div style="font-size:20px;font-weight:800">R$39<span style="font-size:12px;color:var(--text2);font-weight:500"> (3 meses)</span></div>
+          <div style="font-size:11px;color:var(--text2)">Equivale a <strong style="color:var(--text)">R$13/mês</strong></div>
         </div>
-        <div style="font-size:10px;color:var(--text2);text-align:right">Equivale a<br><strong style="color:var(--text);font-size:13px">R$6,58/mês</strong></div>
+        <div style="font-size:10px;color:var(--text3);text-align:right">Total em 1 ano:<br><strong style="color:var(--accent);font-size:11px">R$156</strong></div>
       </div>
     </div>
 
-    <!-- PLANO 3: VITALÍCIO (PROMO) -->
-    <div class="plan-card vip" onclick="selectPlan('vitalicio')" data-plan="vitalicio" style="position:relative;border:2px solid var(--accent);background:linear-gradient(135deg,#1a1a2e,#2a1a2e);box-shadow:0 0 0 4px #ff525215">
-      <div style="position:absolute;top:-10px;left:14px;background:linear-gradient(90deg,#ff5252,#ff6d00);color:#fff;font-size:10px;font-weight:900;padding:4px 12px;border-radius:8px;letter-spacing:.5px;animation:pulseGlow 2s infinite">🔥 MAIS ESCOLHIDO</div>
-      <div style="position:absolute;top:-10px;right:14px;background:#4ade80;color:#0f0f1a;font-size:10px;font-weight:900;padding:4px 12px;border-radius:8px;letter-spacing:.5px">💎 MELHOR CUSTO</div>
+    <!-- PLANO 3: ANUAL (HERO - escolha óbvia) -->
+    <div class="plan-card recommended" onclick="selectPlan('anual')" data-plan="anual" style="position:relative;border:2.5px solid #4ade80;background:linear-gradient(135deg,#1a1a2e,#1a2e22);box-shadow:0 0 0 4px #4ade8020;padding:18px 16px">
+      <div style="position:absolute;top:-12px;left:14px;background:linear-gradient(90deg,#4ade80,#22c55e);color:#0f0f1a;font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;letter-spacing:.5px;animation:pulseGlow 2s infinite">🏆 MAIS ESCOLHIDO</div>
+      <div style="position:absolute;top:-12px;right:14px;background:#ff5252;color:#fff;font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;letter-spacing:.5px">💰 45% OFF</div>
 
-      <div style="margin-top:12px;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--accent);font-weight:800;letter-spacing:1px;margin-bottom:4px">🏆 VITALÍCIO PRO</div>
+      <div style="margin-top:14px;margin-bottom:12px">
+        <div style="font-size:11px;color:#4ade80;font-weight:800;letter-spacing:1px;margin-bottom:4px">⚡ PRO ANUAL</div>
         <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <div style="font-size:14px;color:var(--text2);text-decoration:line-through;font-weight:600">R$297</div>
-          <div style="font-size:30px;font-weight:900;color:var(--accent);line-height:1">R$97</div>
-          <div style="font-size:12px;color:var(--text2);font-weight:600">único pagamento</div>
+          <div style="font-size:14px;color:var(--text2);text-decoration:line-through;font-weight:600">R$178,80</div>
+          <div style="font-size:32px;font-weight:900;color:#4ade80;line-height:1">R$99</div>
+          <div style="font-size:12px;color:var(--text2);font-weight:600">/ano</div>
         </div>
-        <div style="font-size:11px;color:#4ade80;font-weight:800;margin-top:4px">⚡ Economize R$1.091 em 10 anos (vs Mensal)</div>
+        <div style="font-size:12px;color:#4ade80;font-weight:800;margin-top:4px">💸 Você economiza R$79,80 vs Mensal</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">Equivale a <strong style="color:var(--text)">R$8,25/mês</strong> · menos que 1 café</div>
       </div>
 
-      <div style="background:#ff525210;border:1px solid #ff525230;border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="background:#4ade8010;border:1px solid #4ade8030;border-radius:10px;padding:10px;margin-bottom:8px">
         <div style="font-size:11px;color:var(--text);line-height:1.5">
-          <div style="margin-bottom:4px"><strong style="color:var(--accent)">⏰ Em 10 meses se paga.</strong> Depois é só lucro.</div>
-          <div style="color:var(--text2)">• Pague 1x, sem mensalidade pra sempre</div>
-          <div style="color:var(--text2)">• Todas as atualizações futuras grátis</div>
-          <div style="color:var(--text2)">• Suporte prioritário ⚡</div>
-          <div style="color:var(--text2)">• Acesso antecipado a novidades</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ <strong style="color:var(--text)">2 meses grátis</strong> vs trimestral</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ Sem risco de esquecer cobrança</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ Suporte prioritário ⚡</div>
+          <div style="color:var(--text2)">✅ Atualizações premium incluídas</div>
         </div>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div style="font-size:10px;color:var(--accent);font-weight:700;background:#ff525215;border:1px solid #ff525240;border-radius:20px;padding:4px 9px;letter-spacing:.3px">🔥 Só primeiros 50 personals</div>
+        <div style="font-size:10px;color:#4ade80;font-weight:700;background:#4ade8015;border:1px solid #4ade8040;border-radius:20px;padding:4px 9px">⚡ Melhor custo-benefício</div>
         <div style="font-size:10px;color:#4ade80;font-weight:700;background:#4ade8015;border:1px solid #4ade8040;border-radius:20px;padding:4px 9px">✓ Garantia 7 dias</div>
       </div>
     </div>
@@ -1222,7 +1221,7 @@ body {
       👥 <strong style="color:var(--text)" id="socialProof">Mais de 120 personals</strong> já organizam seus alunos aqui
     </div>
 
-    <button class="btn btn-primary" onclick="goToPro()" id="upgradeBtn" style="margin-bottom:10px">Assinar Anual — R$79</button>
+    <button class="btn btn-primary" onclick="goToPro()" id="upgradeBtn" style="margin-bottom:10px">⚡ Assinar Anual — R$99 (45% off)</button>
 
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:12px;font-size:11px;color:var(--text2)">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
@@ -1679,15 +1678,16 @@ function closeUpgrade() { document.getElementById('upgradeModal').classList.remo
 // PLANOS DE PAGAMENTO — substitua pelos links reais da Kiwify
 const CHECKOUT_LINKS = {
   mensal: 'https://pay.kiwify.com.br/8p0v3KJ',
-  anual: 'https://pay.kiwify.com.br/KRA87rp',
-  vitalicio: 'https://pay.kiwify.com.br/P4IqqKo'
+  trimestral: 'https://pay.kiwify.com.br/8p0v3KJ',
+  anual: 'https://pay.kiwify.com.br/KRA87rp'
 };
 
 const PLAN_INFO = {
-  mensal: {label:'Pro Mensal', price:'R$9,90/mês', btn:'Começar 30 dias grátis — R$9,90/mês'},
-  anual: {label:'Pro Anual', price:'R$79/ano', btn:'Assinar Anual — R$79'},
-  vitalicio: {label:'Vitalício', price:'R$97', btn:'🔥 Garantir Vitalício — R$97'},
-  cortesia: {label:'Pro Cortesia', price:'3 meses grátis', btn:'Cortesia ativa'}
+  mensal: {label:'Pro Mensal', price:'R$14,90/mês', btn:'Assinar Mensal — R$14,90/mês'},
+  trimestral: {label:'Pro Trimestral', price:'R$39 (3 meses)', btn:'Assinar Trimestral — R$39'},
+  anual: {label:'Pro Anual', price:'R$99/ano', btn:'⚡ Assinar Anual — R$99 (45% off)'},
+  cortesia: {label:'Pro Cortesia', price:'3 meses grátis', btn:'Cortesia ativa'},
+  vitalicio: {label:'Pro Vitalício', price:'Vitalício', btn:'Vitalício ativo'}
 };
 
 let selectedPlan = 'anual';
@@ -2236,7 +2236,7 @@ function renderStudents() {
         </div>`;
       } else if(remaining <= 0) {
         limitBanner.innerHTML = `<div style="background:#ff525215;border:1px solid #ff525240;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:10px">
-          🔒 <span>Limite de 3 alunos atingido. <strong>Cada novo aluno = ~R$300/mês a mais no seu bolso.</strong> <span onclick="openUpgrade()" style="color:var(--accent);text-decoration:underline;cursor:pointer;font-weight:700">Ver planos — a partir de R$9,90 →</span></span>
+          🔒 <span>Limite de 3 alunos atingido. <strong>Cada novo aluno = ~R$300/mês a mais no seu bolso.</strong> <span onclick="openUpgrade()" style="color:var(--accent);text-decoration:underline;cursor:pointer;font-weight:700">Ver planos — Anual R$99 (45% off) →</span></span>
         </div>`;
       } else { limitBanner.innerHTML = ''; }
     } else { limitBanner.innerHTML = ''; }
