@@ -3742,15 +3742,15 @@ function maybeShowRatingModal() {
     return;
   }
   const daysSince = (Date.now() - firstUse) / 86400000;
-  if(daysSince < 3) return;
+  if(daysSince < 7) return;
 
   const postponed = parseInt(localStorage.getItem('coachorg_rating_postpone') || '0', 10);
   if(postponed) {
     const daysSincePostpone = (Date.now() - postponed) / 86400000;
-    if(daysSincePostpone < 5) return;
+    if(daysSincePostpone < 7) return;
   }
 
-  if(students.length < 1) return;
+  if(students.length < 2) return;
 
   setTimeout(() => openRatingModal(), 2500);
 }
