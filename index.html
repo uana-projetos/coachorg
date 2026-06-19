@@ -1317,8 +1317,15 @@ body {
         </div>
       </div>
       <div class="form-group">
-        <label>Horário padrão <span style="font-size:11px;color:var(--text2);font-weight:400">(aplicado a todos os dias)</span></label>
-        <input type="time" id="fTime" value="06:00" oninput="updateDayTypeSection()">
+        <label>Horário da sessão <span style="font-size:11px;color:var(--text2);font-weight:400">(início → fim)</span></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="time" id="fTime" value="06:00" step="900" oninput="onStartTimeChange();updateDayTypeSection()"
+            style="flex:1;text-align:center;max-width:130px;font-size:15px">
+          <span style="font-size:13px;color:var(--text2);font-weight:600">até</span>
+          <input type="time" id="fEndTime" value="07:00" step="900"
+            style="flex:1;text-align:center;max-width:130px;font-size:15px">
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">⏰ Você recebe notificação no celular quando a aula acabar</div>
       </div>
       <div class="form-group">
         <label>Dia do Pagamento</label>
@@ -1806,6 +1813,62 @@ function renderTasks() {
   `).join('');
 }
 
+function addMinutes(timeStr, minutes) {
+  if(!timeStr || !timeStr.includes(':')) return '07:00';
+  const [h,m] = timeStr.split(':').map(Number);
+  const total = h*60 + m + minutes;
+  const hh = Math.floor(total/60) % 24;
+  const mm = total % 60;
+  return String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+}
+
+function onStartTimeChange() {
+  const startEl = document.getElementById('fTime');
+  const endEl = document.getElementById('fEndTime');
+  if(startEl && endEl && startEl.value) endEl.value = addMinutes(startEl.value, 60);
+}
+
+let _sessionEndTimers = [];
+function scheduleSessionEndNotifications() {
+  _sessionEndTimers.forEach(t => clearTimeout(t));
+  _sessionEndTimers = [];
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const now = new Date();
+  const dow = now.getDay();
+  const todayStudents = students.filter(s => s.days && s.days.includes(dow));
+
+  todayStudents.forEach(s => {
+    const start = s.times?.[String(dow)] || s.time || '06:00';
+    const end = s.endTime || addMinutes(start, 60);
+    const [h,m] = end.split(':').map(Number);
+    const endDate = new Date();
+    endDate.setHours(h, m, 0, 0);
+    const ms = endDate.getTime() - now.getTime();
+    if(ms > 0 && ms < 24*60*60*1000) {
+      const timer = setTimeout(() => fireSessionEndNotification(s), ms);
+      _sessionEndTimers.push(timer);
+    }
+  });
+}
+
+async function fireSessionEndNotification(student) {
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const title = `Aula com ${student.name.split(' ')[0]} terminou`;
+  const body = 'Toca aqui pra marcar presença ou enviar mensagem';
+  const icon = './icons/icon-192x192.png';
+  try {
+    if('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if(reg) {
+        reg.showNotification(title, { body, icon, badge: icon, tag: 'session-end-' + student.id, vibrate: [200,100,200] });
+        return;
+      }
+    }
+    new Notification(title, { body, icon, tag: 'session-end-' + student.id });
+  } catch(e) {}
+}
+
 function renderBirthdayBanner() {
   const banner = document.getElementById('birthdayBanner');
   if(!banner) return;
@@ -1844,6 +1907,7 @@ function renderHome() {
   document.getElementById('todayCount').textContent = todayStudents.length;
   renderTasks();
   renderBirthdayBanner();
+  scheduleSessionEndNotifications();
 
   const pending = students.filter(s=>!isPaymentDone(s.id));
   document.getElementById('pendingPayments').textContent = pending.length;
@@ -2557,6 +2621,7 @@ function openAddStudent() {
   document.getElementById('fBirthday').value = '';
   document.getElementById('fClassType').value = 'Individual';
   document.getElementById('fTime').value = settings.defaultTime || '06:00';
+  document.getElementById('fEndTime').value = addMinutes(settings.defaultTime || '06:00', 60);
   document.getElementById('fPayDay').value = '';
   document.getElementById('fValue').value = '';
   document.getElementById('fNotes').value = '';
@@ -2580,6 +2645,7 @@ function editStudent(id) {
   document.getElementById('fLocal').value = s.local || '';
   document.getElementById('fClassType').value = s.classType || 'Individual';
   document.getElementById('fTime').value = s.time || '06:00';
+  document.getElementById('fEndTime').value = s.endTime || addMinutes(s.time||'06:00', 60);
   document.getElementById('fPayDay').value = s.payDay || '';
   document.getElementById('fValue').value = s.value || '';
   document.getElementById('fNotes').value = s.notes || '';
@@ -2664,6 +2730,7 @@ function saveStudent(e) {
     phone: document.getElementById('fPhone').value.trim(),
     email: document.getElementById('fEmail').value.trim(),
     birthday: document.getElementById('fBirthday').value || '',
+    endTime: document.getElementById('fEndTime').value || '',
     goal: document.getElementById('fGoal').value,
     local: document.getElementById('fLocal').value.trim(),
     classType: classType,
