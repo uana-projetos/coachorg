@@ -1203,6 +1203,38 @@ body {
       </div>
     </div>
 
+    <!-- PLANO 4: SÓCIO FUNDADOR (PREMIUM LIMITADO) -->
+    <div class="plan-card" onclick="selectPlan('fundador')" data-plan="fundador" style="position:relative;border:2px solid #d4af37;background:linear-gradient(135deg,#1a1a2e,#2a1f0a);box-shadow:0 0 0 3px #d4af3720;padding:18px 16px;margin-top:18px">
+      <div style="position:absolute;top:-12px;left:14px;background:linear-gradient(90deg,#d4af37,#f5d76e);color:#0f0f1a;font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;letter-spacing:.5px">👑 EDIÇÃO LIMITADA</div>
+      <div style="position:absolute;top:-12px;right:14px;background:#0f0f1a;border:1.5px solid #d4af37;color:#d4af37;font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;letter-spacing:.5px">🔥 <span id="fundadorSlotsLeft">47</span>/50 RESTAM</div>
+
+      <div style="margin-top:14px;margin-bottom:12px">
+        <div style="font-size:11px;color:#d4af37;font-weight:800;letter-spacing:1.5px;margin-bottom:4px">🏆 SÓCIO FUNDADOR</div>
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <div style="font-size:32px;font-weight:900;color:#d4af37;line-height:1">R$297</div>
+          <div style="font-size:12px;color:var(--text2);font-weight:600">único pagamento, vitalício</div>
+        </div>
+        <div style="font-size:11px;color:#d4af37;font-weight:800;margin-top:4px">⚡ Quando vender as 50 vagas, esse plano SOME pra sempre</div>
+      </div>
+
+      <div style="background:#d4af3710;border:1px solid #d4af3730;border-radius:10px;padding:12px;margin-bottom:8px">
+        <div style="font-size:12px;color:var(--text);line-height:1.6">
+          <div style="color:#d4af37;font-weight:800;margin-bottom:6px">🏆 BENEFÍCIOS EXCLUSIVOS</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ <strong style="color:var(--text)">Vitalício</strong> — pague 1x, use pra sempre</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ <strong style="color:var(--text)">Selo "Sócio Fundador"</strong> no seu perfil</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ <strong style="color:var(--text)">Voto no roadmap</strong> — você escolhe features</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ <strong style="color:var(--text)">WhatsApp direto</strong> com o fundador</div>
+          <div style="color:var(--text2);margin-bottom:3px">✅ <strong style="color:var(--text)">Acesso antecipado</strong> a TODAS as novidades</div>
+          <div style="color:var(--text2)">✅ <strong style="color:var(--text)">Updates premium</strong> pra sempre</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="font-size:10px;color:#d4af37;font-weight:700;background:#d4af3715;border:1px solid #d4af3740;border-radius:20px;padding:4px 9px;letter-spacing:.3px">⚡ Vagas únicas na história do app</div>
+        <div style="font-size:10px;color:#4ade80;font-weight:700;background:#4ade8015;border:1px solid #4ade8040;border-radius:20px;padding:4px 9px">✓ Garantia 7 dias</div>
+      </div>
+    </div>
+
     <div style="background:var(--bg);border-radius:14px;padding:14px;margin:14px 0">
       <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text2);letter-spacing:.5px">TUDO QUE VOCÊ DESBLOQUEIA:</div>
       <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:13px">
@@ -1679,16 +1711,25 @@ function closeUpgrade() { document.getElementById('upgradeModal').classList.remo
 const CHECKOUT_LINKS = {
   mensal: 'https://pay.kiwify.com.br/8p0v3KJ',
   trimestral: 'https://pay.kiwify.com.br/8p0v3KJ',
-  anual: 'https://pay.kiwify.com.br/KRA87rp'
+  anual: 'https://pay.kiwify.com.br/KRA87rp',
+  fundador: 'https://pay.kiwify.com.br/P4IqqKo'
 };
 
 const PLAN_INFO = {
   mensal: {label:'Pro Mensal', price:'R$14,90/mês', btn:'Assinar Mensal — R$14,90/mês'},
   trimestral: {label:'Pro Trimestral', price:'R$39 (3 meses)', btn:'Assinar Trimestral — R$39'},
   anual: {label:'Pro Anual', price:'R$99/ano', btn:'⚡ Assinar Anual — R$99 (45% off)'},
+  fundador: {label:'🏆 Sócio Fundador', price:'R$297', btn:'🏆 Quero ser Sócio Fundador — R$297'},
   cortesia: {label:'Pro Cortesia', price:'3 meses grátis', btn:'Cortesia ativa'},
   vitalicio: {label:'Pro Vitalício', price:'Vitalício', btn:'Vitalício ativo'}
 };
+
+const FUNDADOR_TOTAL_SLOTS = 50;
+function getFundadorSlotsLeft() {
+  const stored = localStorage.getItem('coachorg_fundador_sold');
+  const sold = stored ? parseInt(stored, 10) : 3;
+  return Math.max(0, FUNDADOR_TOTAL_SLOTS - sold);
+}
 
 let selectedPlan = 'anual';
 
@@ -1733,14 +1774,18 @@ function activatePro(code) {
 
 // Contador de vagas vitalícias + timer da promoção
 function updatePromoCounter() {
-  // Vagas vitalícias começam em 50, decrementam fictícia por dia
+  // Promo banner: agora mostra "45%" fixo (era contador de vagas)
+  const slotsEl = document.getElementById('vipSlotsLeft');
+  if(slotsEl) slotsEl.textContent = '45%';
+
+  // Vagas do Sócio Fundador (decrementam por dia)
   const launchDate = new Date('2026-06-18').getTime();
   const now = Date.now();
   const daysSince = Math.floor((now - launchDate) / 86400000);
   const slotsUsed = Math.min(45, Math.max(3, daysSince * 2 + 3));
   const slotsLeft = Math.max(2, 50 - slotsUsed);
-  const slotsEl = document.getElementById('vipSlotsLeft');
-  if(slotsEl) slotsEl.textContent = slotsLeft;
+  const fundadorEl = document.getElementById('fundadorSlotsLeft');
+  if(fundadorEl) fundadorEl.textContent = slotsLeft;
 
   // Timer: 14 dias de promoção desde lançamento
   const promoEnd = launchDate + (14 * 86400000);
