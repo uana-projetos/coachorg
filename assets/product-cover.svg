@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff5252"/>
+      <stop offset="100%" stop-color="#ff1744"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.3">
+      <stop offset="0%" stop-color="#ff5252" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ff5252" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="350" r="500" fill="url(#glow)"/>
+
+  <g transform="translate(312, 140)">
+    <rect width="400" height="400" rx="80" fill="#1a1a2e" stroke="#ff525230" stroke-width="3"/>
+    <rect x="90" y="100" width="220" height="44" rx="12" fill="url(#accent)"/>
+    <circle cx="118" cy="122" r="14" fill="#1a1a2e"/>
+    <path d="M108 122 L116 130 L130 110" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="90" y="164" width="220" height="44" rx="12" fill="url(#accent)" opacity="0.7"/>
+    <rect x="90" y="228" width="220" height="44" rx="12" fill="url(#accent)" opacity="0.4"/>
+    <rect x="90" y="292" width="220" height="44" rx="12" fill="url(#accent)" opacity="0.2"/>
+  </g>
+
+  <text x="512" y="620" text-anchor="middle" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="100" fill="#ffffff" letter-spacing="-3">Coach<tspan fill="#ff5252">Org</tspan></text>
+  <text x="512" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#999" letter-spacing="4">PARA PERSONAL TRAINERS</text>
+
+  <g transform="translate(102, 740)">
+    <rect width="820" height="84" rx="20" fill="#ff525215" stroke="#ff525240" stroke-width="2"/>
+    <text x="410" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="30" fill="#fff">⚡ Agenda + Pagamentos + WhatsApp + IA</text>
+  </g>
+
+  <g transform="translate(102, 860)">
+    <text font-family="Arial, sans-serif" font-weight="600" font-size="24" fill="#aaa">✓ Alunos ilimitados   ✓ Coach IA   ✓ Funciona offline   ✓ Sem mensalidade no Vitalício</text>
+  </g>
+</svg>
