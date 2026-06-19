@@ -3406,9 +3406,9 @@ async function renderReferralPanel() {
   el.innerHTML = `
     <div style="margin-bottom:14px">
       <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Seu link de indicação:</div>
-      <div style="display:flex;gap:8px">
-        <div style="flex:1;background:var(--bg);border:1.5px solid #ffffff15;border-radius:10px;padding:10px 12px;font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${link}</div>
-        <button onclick="copyRefLink()" class="btn btn-primary" style="padding:10px 14px;font-size:12px;flex-shrink:0">Copiar</button>
+      <div style="display:flex;gap:6px;align-items:stretch">
+        <div style="flex:1;min-width:0;background:var(--bg);border:1.5px solid #ffffff15;border-radius:10px;padding:11px 12px;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center">${link}</div>
+        <button onclick="copyRefLink()" aria-label="Copiar link" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0 14px;font-weight:700;cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar</button>
       </div>
     </div>
     <div style="margin-bottom:12px">
