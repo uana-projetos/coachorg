@@ -854,6 +854,14 @@ body {
     </div>
   </div>
 
+  <div id="installBanner" style="display:none;background:linear-gradient(90deg,#ff5252,#ff1744);border-radius:14px;padding:12px 14px;margin-bottom:12px;color:#fff;display:none;align-items:center;gap:12px;cursor:pointer" onclick="triggerInstall()">
+    <div style="font-size:22px;flex-shrink:0">📲</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:13px;margin-bottom:2px">Instalar CoachOrg no celular</div>
+      <div style="font-size:11px;opacity:.9">Tela inicial, abre offline, igual app de loja</div>
+    </div>
+    <button style="background:#fff;color:var(--accent);border:none;border-radius:10px;padding:8px 14px;font-weight:800;font-size:12px;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();triggerInstall()">Instalar</button>
+  </div>
   <div id="overdueBanner"></div>
   <div id="birthdayBanner"></div>
   <div id="waAllBtn"></div>
@@ -3534,6 +3542,74 @@ function requestPushPermission() {
 }
 
 // ==================== END COACH IA ====================
+
+let _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  if(!localStorage.getItem('coachorg_install_dismissed')) showInstallBanner();
+});
+window.addEventListener('appinstalled', () => {
+  _deferredInstallPrompt = null;
+  hideInstallBanner();
+  showToast('🎉 App instalado com sucesso!');
+});
+
+function showInstallBanner() {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if(isStandalone) return;
+  const banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'flex';
+}
+function hideInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'none';
+}
+async function triggerInstall() {
+  if(_deferredInstallPrompt) {
+    _deferredInstallPrompt.prompt();
+    const { outcome } = await _deferredInstallPrompt.userChoice;
+    if(outcome === 'dismissed') { localStorage.setItem('coachorg_install_dismissed','1'); hideInstallBanner(); }
+    _deferredInstallPrompt = null;
+    return;
+  }
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+  if(isIOS) { showIOSInstallGuide(); return; }
+  showToast('Use o menu do navegador → "Instalar app" ou "Adicionar à tela inicial"');
+}
+function showIOSInstallGuide() {
+  let m = document.getElementById('iosInstallModal');
+  if(!m) {
+    m = document.createElement('div');
+    m.id = 'iosInstallModal';
+    m.className = 'modal-overlay';
+    m.onclick = (e)=>{ if(e.target===m) m.classList.remove('show'); };
+    document.body.appendChild(m);
+  }
+  m.innerHTML = `<div class="modal" style="max-width:340px">
+    <div class="modal-header"><div class="modal-title">📲 Instalar no iPhone</div><button class="modal-close" onclick="document.getElementById('iosInstallModal').classList.remove('show')">×</button></div>
+    <div style="padding:0 20px 22px;font-size:13px;color:var(--text);line-height:1.6">
+      <ol style="padding-left:18px;margin:0 0 14px">
+        <li>Abre essa página no <strong>Safari</strong> (não funciona no Chrome do iPhone)</li>
+        <li>Toca no botão <strong>compartilhar</strong> ↑ embaixo da tela</li>
+        <li>Rola pra baixo na lista</li>
+        <li>Toca em <strong>"Adicionar à Tela de Início"</strong></li>
+        <li>Confirma o nome <strong>CoachOrg</strong> → <strong>Adicionar</strong></li>
+      </ol>
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:11px;color:var(--text2)">✅ Depois disso o ícone aparece na tela inicial e o app abre em tela cheia, igual app de loja.</div>
+    </div>
+  </div>`;
+  m.classList.add('show');
+}
+(function(){
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if(isIOS && !isStandalone && !localStorage.getItem('coachorg_install_dismissed')) {
+    setTimeout(()=>showInstallBanner(), 1500);
+  }
+})();
 
 renderHome();
 updateAdBanner();
