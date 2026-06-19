@@ -2388,6 +2388,19 @@ function showStudentDetail(id) {
       </div>
     </div>
 
+    <div class="card" style="border:1.5px solid #ff525240;background:linear-gradient(135deg,#1a1a2e,#22112a);margin-top:18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="font-size:18px">🤖</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">Gerar Treino com IA</div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.4">Descreva o objetivo do treino. Ex: "peito e tríceps intermediário 45min, hipertrofia"</div>
+      <textarea id="aiPromptInput_${s.id}" placeholder="Ex: treino de pernas iniciante, 4 exercícios, foco glúteo" rows="2"
+        style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:13px;resize:vertical;font-family:inherit;margin-bottom:8px"></textarea>
+      <button onclick="generateAIWorkout('${s.id}')" id="aiGenBtn_${s.id}"
+        style="width:100%;background:linear-gradient(90deg,var(--accent),#ff6d6d);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">⚡ Gerar treino</button>
+      <div id="aiResult_${s.id}" style="margin-top:12px"></div>
+    </div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px">
       <div class="section-title" style="margin:0">Treinos</div>
       <button class="detail-action-btn" onclick="openAddWorkout('${s.id}')">+ Novo Treino</button>
@@ -2598,6 +2611,126 @@ function deleteStudent() {
 }
 
 // WORKOUTS
+const _EXERCISES = {
+  peito: ['Supino reto barra','Supino inclinado halter','Crucifixo banco inclinado','Crossover polia','Peck deck','Flexão de braço','Supino declinado','Pullover halter'],
+  costas: ['Puxada frente pegada aberta','Remada curvada barra','Remada baixa cabo','Remada cavalinho','Pulldown unilateral','Levantamento terra','Pull-down corda','Barra fixa assistida'],
+  ombro: ['Desenvolvimento halter','Elevação lateral','Elevação frontal halter','Encolhimento','Crucifixo invertido','Arnold press','Face pull','Remada alta'],
+  biceps: ['Rosca direta barra','Rosca alternada halter','Rosca martelo','Rosca Scott','Rosca concentrada','Rosca 21','Rosca cabo W'],
+  triceps: ['Tríceps testa barra W','Tríceps polia corda','Tríceps francês unilateral','Tríceps mergulho banco','Tríceps coice','Tríceps polia barra reta','Extensão tríceps overhead'],
+  pernas: ['Agachamento livre','Leg press 45°','Cadeira extensora','Stiff halter','Mesa flexora','Avanço alternado','Cadeira flexora unilateral','Agachamento búlgaro','Panturrilha em pé'],
+  quadriceps: ['Agachamento livre','Leg press 45°','Cadeira extensora','Hack machine','Avanço alternado','Agachamento sumô'],
+  posterior: ['Stiff halter','Mesa flexora','Cadeira flexora unilateral','Bom dia barra','Levantamento terra romeno'],
+  gluteo: ['Hip thrust barra','Agachamento sumô','Elevação pélvica unilateral','Cadeira abdutora','Glúteo coice polia','Avanço passada','Stiff halter'],
+  panturrilha: ['Panturrilha em pé máquina','Panturrilha sentado','Panturrilha unilateral halter','Burrinho no leg press'],
+  core: ['Prancha frontal','Prancha lateral','Abdominal canivete','Abdominal infra na barra','Russian twist','Hollow body hold','Dead bug'],
+  abdomen: ['Prancha frontal','Abdominal supra','Abdominal infra','Bicicleta no chão','Prancha lateral','Russian twist'],
+  cardio: ['Esteira 12% incl 5min','Bike 10min ritmo médio','Polichinelo 3x30s','Burpee 4x10','Corda 4x40s','Escada 6min'],
+  funcional: ['Burpee','Agachamento com salto','Mountain climber','Polichinelo','Prancha alternada','Goblet squat']
+};
+
+function _parsePrompt(p) {
+  const s = p.toLowerCase();
+  const groups = [];
+  const map = {
+    peito: ['peito','torax','peitoral'],
+    costas: ['costa','dorsal','lat'],
+    ombro: ['ombro','deltoid'],
+    biceps: ['biceps','bíceps'],
+    triceps: ['triceps','tríceps'],
+    quadriceps: ['quad','quadrice','frente da coxa'],
+    posterior: ['posterior','isquio','isquiotibi'],
+    gluteo: ['gluteo','glúteo','bumbum'],
+    pernas: ['pernas','perna','membros inferiores'],
+    panturrilha: ['panturrilha','batata da perna'],
+    core: ['core'],
+    abdomen: ['abdom','abs','barriga'],
+    cardio: ['cardio','aerobi','aerób'],
+    funcional: ['funcional','hiit']
+  };
+  for(const k in map) if(map[k].some(t=>s.includes(t))) groups.push(k);
+  if(groups.length===0) groups.push('pernas');
+
+  let level = 'intermediario';
+  if(/inicia|princip|começ/.test(s)) level='iniciante';
+  else if(/avanc|avanç|expert/.test(s)) level='avancado';
+
+  let duration = 45;
+  const m = s.match(/(\d{2,3})\s*min/);
+  if(m) duration = parseInt(m[1],10);
+
+  let count = null;
+  const m2 = s.match(/(\d{1,2})\s*(exerc|movim)/);
+  if(m2) count = parseInt(m2[1],10);
+  if(!count) count = duration <= 30 ? 4 : duration <= 45 ? 5 : duration <= 60 ? 7 : 8;
+
+  let goal = 'hipertrofia';
+  if(/forca|força/.test(s)) goal='força';
+  else if(/resist|emagre|cardio/.test(s)) goal='resistência';
+
+  return { groups, level, duration, count, goal };
+}
+
+function _pickExercises(groups, count) {
+  const pool = [];
+  const perGroup = Math.max(2, Math.ceil(count/groups.length));
+  for(const g of groups) {
+    const list = (_EXERCISES[g]||[]).slice();
+    list.sort(()=>Math.random()-0.5);
+    pool.push(...list.slice(0,perGroup).map(ex=>({group:g, name:ex})));
+  }
+  return pool.slice(0,count);
+}
+
+function _setsReps(level, goal) {
+  if(goal==='força') return level==='avancado' ? '4x4-6 (3min desc)' : '4x6-8 (2min desc)';
+  if(goal==='resistência') return '3x15-20 (45s desc)';
+  if(level==='iniciante') return '3x12-15 (60s desc)';
+  if(level==='avancado') return '4x8-10 (90s desc)';
+  return '4x10-12 (75s desc)';
+}
+
+function generateAIWorkout(studentId) {
+  const input = document.getElementById('aiPromptInput_'+studentId);
+  const btn = document.getElementById('aiGenBtn_'+studentId);
+  const result = document.getElementById('aiResult_'+studentId);
+  const prompt = input.value.trim();
+  if(!prompt) { showToast('Digite o que você quer no treino'); return; }
+  btn.textContent = '🧠 Gerando...'; btn.disabled = true;
+
+  setTimeout(()=>{
+    const cfg = _parsePrompt(prompt);
+    const exs = _pickExercises(cfg.groups, cfg.count);
+    const reps = _setsReps(cfg.level, cfg.goal);
+    const title = 'Treino ' + cfg.groups.map(g=>g[0].toUpperCase()+g.slice(1)).join(' + ');
+    const subtitle = `${cfg.duration}min · ${cfg.level} · ${cfg.goal}`;
+    const lines = exs.map((ex,i)=>`${i+1}. ${ex.name} — ${reps}`).join('\n');
+    const finisher = cfg.duration >= 45 ? '\n\nFinalizador: Prancha 3x30s' : '';
+    const fullText = lines + finisher;
+
+    result.innerHTML = `
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-top:6px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:2px">${title}</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">${subtitle}</div>
+        <pre style="font-size:12px;white-space:pre-wrap;color:var(--text);font-family:inherit;line-height:1.6;margin:0">${fullText}</pre>
+        <div style="display:flex;gap:6px;margin-top:12px">
+          <button onclick="saveAIWorkout('${studentId}', \`${title.replace(/`/g,'')}\`, \`${fullText.replace(/`/g,'')}\`)" style="flex:1;background:var(--green);color:#fff;border:none;border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-size:12px">💾 Salvar como treino</button>
+          <button onclick="generateAIWorkout('${studentId}')" style="background:var(--card2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:9px 14px;cursor:pointer;font-size:12px">🔄 Outra opção</button>
+        </div>
+      </div>`;
+    btn.textContent = '⚡ Gerar treino'; btn.disabled = false;
+  }, 600);
+}
+
+function saveAIWorkout(studentId, name, exercises) {
+  const s = students.find(x=>x.id===studentId);
+  if(!s) return;
+  s.workouts = s.workouts || [];
+  s.workouts.push({ name, exercises });
+  saveStudents();
+  showToast('✅ Treino salvo!');
+  showStudentDetail(studentId);
+}
+
 function openAddWorkout(studentId) {
   document.getElementById('wStudentId').value = studentId;
   document.getElementById('wIndex').value = -1;
