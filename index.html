@@ -866,6 +866,7 @@ body {
     </div>
     <button style="background:#fff;color:var(--accent);border:none;border-radius:10px;padding:8px 14px;font-weight:800;font-size:12px;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();triggerInstall()">Instalar</button>
   </div>
+  <div id="personalSelfCare"></div>
   <div id="overdueBanner"></div>
   <div id="birthdayBanner"></div>
   <div id="workoutExpBanner"></div>
@@ -2276,6 +2277,130 @@ function renderWorkoutExpirationBanner() {
   </div>`;
 }
 
+function _selfCareKey() {
+  return 'coachorg_selfcare_' + new Date().toISOString().slice(0,10);
+}
+
+function getSelfCareState() {
+  const raw = localStorage.getItem(_selfCareKey());
+  return raw ? JSON.parse(raw) : { water: 0, meals: {}, workout: false, stretch: false };
+}
+
+function saveSelfCareState(s) {
+  localStorage.setItem(_selfCareKey(), JSON.stringify(s));
+}
+
+function selfCareAddWater(delta) {
+  const s = getSelfCareState();
+  s.water = Math.max(0, Math.min(12, (s.water || 0) + delta));
+  saveSelfCareState(s);
+  renderPersonalSelfCare();
+  if(s.water === 8) showToast('🥳 Meta de água atingida! 8 copos hoje');
+}
+
+function selfCareToggleMeal(meal) {
+  const s = getSelfCareState();
+  s.meals = s.meals || {};
+  s.meals[meal] = !s.meals[meal];
+  saveSelfCareState(s);
+  renderPersonalSelfCare();
+}
+
+function selfCareToggleField(field) {
+  const s = getSelfCareState();
+  s[field] = !s[field];
+  saveSelfCareState(s);
+  renderPersonalSelfCare();
+}
+
+const SELF_CARE_MEALS = [
+  { key:'cafe', label:'Café', icon:'☕', hour:'7h' },
+  { key:'lanche1', label:'Lanche', icon:'🍎', hour:'10h' },
+  { key:'almoco', label:'Almoço', icon:'🍽️', hour:'12h' },
+  { key:'lanche2', label:'Lanche', icon:'🥜', hour:'16h' },
+  { key:'janta', label:'Janta', icon:'🌙', hour:'19h' }
+];
+
+function renderPersonalSelfCare() {
+  const el = document.getElementById('personalSelfCare');
+  if(!el) return;
+  const collapsed = localStorage.getItem('coachorg_selfcare_collapsed') === '1';
+  const s = getSelfCareState();
+  const waterTarget = 8;
+  const waterPct = Math.min(100, Math.round((s.water || 0) / waterTarget * 100));
+
+  if(collapsed) {
+    el.innerHTML = `<div onclick="toggleSelfCareCollapsed()" style="background:linear-gradient(135deg,#1a1a2e,#1a2e2a);border:1.5px solid #4ade8030;border-radius:14px;padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">💚</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text)">Eu Personal</span>
+        <span style="font-size:11px;color:var(--text2)">💧 ${s.water || 0}/${waterTarget} · ${Object.values(s.meals||{}).filter(Boolean).length}/${SELF_CARE_MEALS.length} refeições</span>
+      </div>
+      <span style="font-size:14px;color:var(--text2)">▼</span>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div style="background:linear-gradient(135deg,#1a1a2e,#1a2e2a);border:1.5px solid #4ade8040;border-radius:14px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:22px">💚</span>
+        <div>
+          <div style="font-size:13px;font-weight:800;color:#4ade80;letter-spacing:.3px">EU PERSONAL</div>
+          <div style="font-size:10px;color:var(--text2)">Quem cuida de quem cuida</div>
+        </div>
+      </div>
+      <button onclick="toggleSelfCareCollapsed()" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">▲</button>
+    </div>
+
+    <div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:18px">💧</span>
+          <span style="font-size:12px;font-weight:700">Água</span>
+          <span style="font-size:11px;color:var(--text2)">${s.water || 0}/${waterTarget} copos</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="selfCareAddWater(-1)" style="width:30px;height:30px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);color:var(--text);cursor:pointer;font-weight:700">−</button>
+          <button onclick="selfCareAddWater(1)" style="width:30px;height:30px;border-radius:50%;background:#5b8cff;border:none;color:#fff;cursor:pointer;font-weight:800">+</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:3px;height:16px">
+        ${Array.from({length: waterTarget}, (_,i) => `<div style="flex:1;background:${i < (s.water||0) ? '#5b8cff' : '#ffffff10'};border-radius:3px;transition:.3s"></div>`).join('')}
+      </div>
+    </div>
+
+    <div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px">🍽️ Refeições do dia</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+        ${SELF_CARE_MEALS.map(m => {
+          const done = s.meals?.[m.key];
+          return `<button onclick="selfCareToggleMeal('${m.key}')" style="background:${done ? '#4ade8025' : 'var(--card)'};border:1.5px solid ${done ? '#4ade80' : 'var(--border)'};border-radius:10px;padding:8px 4px;cursor:pointer;text-align:center;${done ? 'box-shadow:0 0 0 2px #4ade8030' : ''}">
+            <div style="font-size:20px">${m.icon}</div>
+            <div style="font-size:10px;color:${done ? '#4ade80' : 'var(--text2)'};font-weight:700;margin-top:2px">${m.label}</div>
+            <div style="font-size:9px;color:var(--text3)">${m.hour}</div>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button onclick="selfCareToggleField('workout')" style="flex:1;background:${s.workout ? '#ff525225' : 'var(--bg)'};border:1.5px solid ${s.workout ? 'var(--accent)' : 'var(--border)'};border-radius:10px;padding:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:${s.workout ? 'var(--accent)' : 'var(--text)'};font-size:12px;font-weight:700">
+        ${s.workout ? '✅' : '🏋️'} Meu treino
+      </button>
+      <button onclick="selfCareToggleField('stretch')" style="flex:1;background:${s.stretch ? '#ffab0025' : 'var(--bg)'};border:1.5px solid ${s.stretch ? '#ffab00' : 'var(--border)'};border-radius:10px;padding:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:${s.stretch ? '#ffab00' : 'var(--text)'};font-size:12px;font-weight:700">
+        ${s.stretch ? '✅' : '🧘'} Alongamento
+      </button>
+    </div>
+  </div>`;
+}
+
+function toggleSelfCareCollapsed() {
+  const cur = localStorage.getItem('coachorg_selfcare_collapsed') === '1';
+  localStorage.setItem('coachorg_selfcare_collapsed', cur ? '0' : '1');
+  renderPersonalSelfCare();
+}
+
 function renderBirthdayBanner() {
   const banner = document.getElementById('birthdayBanner');
   if(!banner) return;
@@ -2313,6 +2438,7 @@ function renderHome() {
   document.getElementById('totalStudents').textContent = students.length;
   document.getElementById('todayCount').textContent = todayStudents.length;
   renderTasks();
+  renderPersonalSelfCare();
   renderBirthdayBanner();
   renderWorkoutExpirationBanner();
   scheduleSessionEndNotifications();
