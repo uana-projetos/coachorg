@@ -1191,8 +1191,8 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       <button onclick="fecharMenuMais();showPage('settings');setTimeout(()=>document.getElementById('referralPanel')?.scrollIntoView({behavior:'smooth'}),200)" style="width:100%;background:linear-gradient(90deg,#ffab00,#ff6d00);color:#0f0f1a;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:14px">
         <span style="font-size:22px">🎁</span>
         <div>
-          <div>Indique amigo · ganhe acesso grátis</div>
-          <div style="font-size:10px;font-weight:600;opacity:.8">Vocês dois ganham meses extras no Pro</div>
+          <div>Indique amigo · ganhe até 1 ano grátis</div>
+          <div style="font-size:10px;font-weight:600;opacity:.8">3 amigos = 6 meses · 5 amigos = 1 ano no Pro</div>
         </div>
       </button>
 
@@ -7660,7 +7660,7 @@ async function submitRating() {
   btn.disabled = false;
 
   const thankMsg = _currentRating >= 4
-    ? '🤩 Valeu! Que tal indicar pra um colega? Aba Coach IA → Indique & Ganhe'
+    ? '🤩 Valeu! Que tal indicar pra um colega? Menu ⋯ → Indique amigo'
     : '🙏 Obrigado pela honestidade. Vou usar pra melhorar — promesso!';
   showToast(thankMsg);
 }
