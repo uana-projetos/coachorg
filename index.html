@@ -897,8 +897,30 @@ body {
 
 <!-- PAGE: SCHEDULE -->
 <div class="page" id="pageSchedule">
-  <div class="week-header" id="weekHeader"></div>
-  <div id="daySchedule"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px">
+    <div style="display:flex;background:var(--card);border-radius:12px;padding:3px;border:1px solid var(--border)">
+      <button onclick="setScheduleView('grid')" id="schedViewGrid"
+        style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:7px 16px;font-weight:700;cursor:pointer;font-size:12px">📅 Semana</button>
+      <button onclick="setScheduleView('list')" id="schedViewList"
+        style="background:transparent;color:var(--text2);border:none;border-radius:9px;padding:7px 16px;font-weight:600;cursor:pointer;font-size:12px">📋 Lista</button>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button onclick="changeWeek(-1)" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:16px">‹</button>
+      <div id="weekRange" style="font-size:11px;color:var(--text2);font-weight:700;min-width:90px;text-align:center"></div>
+      <button onclick="changeWeek(1)" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:16px">›</button>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div id="weekGridView">
+    <div id="weekGrid"></div>
+  </div>
+
+  <!-- List View (oculto por padrão) -->
+  <div id="weekListView" style="display:none">
+    <div class="week-header" id="weekHeader"></div>
+    <div id="daySchedule"></div>
+  </div>
 </div>
 
 <!-- PAGE: PAYMENTS -->
@@ -2376,13 +2398,142 @@ function renderStudents() {
 }
 
 // SCHEDULE
+let scheduleView = localStorage.getItem('coachorg_schedule_view') || 'grid';
+let weekOffset = 0;
+
+function setScheduleView(v) {
+  scheduleView = v;
+  localStorage.setItem('coachorg_schedule_view', v);
+  document.getElementById('weekGridView').style.display = v === 'grid' ? '' : 'none';
+  document.getElementById('weekListView').style.display = v === 'list' ? '' : 'none';
+  const g = document.getElementById('schedViewGrid');
+  const l = document.getElementById('schedViewList');
+  if(g && l) {
+    g.style.background = v === 'grid' ? 'var(--accent)' : 'transparent';
+    g.style.color = v === 'grid' ? '#fff' : 'var(--text2)';
+    l.style.background = v === 'list' ? 'var(--accent)' : 'transparent';
+    l.style.color = v === 'list' ? '#fff' : 'var(--text2)';
+  }
+  renderSchedule();
+}
+
+function changeWeek(delta) {
+  weekOffset += delta;
+  renderSchedule();
+}
+
+function _getWeekDates() {
+  const today = new Date();
+  today.setDate(today.getDate() + weekOffset * 7);
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+  const dates = [];
+  for(let i=0; i<7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
 function renderSchedule() {
   const today = new Date();
+  const todayKey = today.toISOString().slice(0,10);
   const dow = today.getDay();
+  const weekDates = _getWeekDates();
+  const start = weekDates[0], end = weekDates[6];
+  const rangeEl = document.getElementById('weekRange');
+  if(rangeEl) rangeEl.textContent = `${start.getDate()}-${end.getDate()} ${start.toLocaleString('pt-BR',{month:'short'}).replace('.','')}`;
 
+  if(scheduleView === 'grid') renderScheduleGrid(weekDates, todayKey);
+  else renderScheduleList(dow);
+}
+
+function renderScheduleGrid(weekDates, todayKey) {
+  const grid = document.getElementById('weekGrid');
+  if(!grid) return;
+
+  const DAYS_GRID = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const dayIndexMap = [1,2,3,4,5,6,0];
+
+  let allTimes = new Set();
+  students.forEach(s => {
+    if(!s.days) return;
+    s.days.forEach(d => {
+      const t = s.times?.[String(d)] || s.time || '06:00';
+      allTimes.add(parseInt(t.split(':')[0], 10));
+    });
+  });
+  const hours = [...allTimes].sort((a,b)=>a-b);
+  if(hours.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="padding:30px 20px"><p>Nenhum treino cadastrado nessa semana</p></div>';
+    return;
+  }
+  const minH = Math.max(5, hours[0] - 1);
+  const maxH = Math.min(23, hours[hours.length-1] + 2);
+  const hourRange = [];
+  for(let h = minH; h <= maxH; h++) hourRange.push(h);
+
+  const ROW_HEIGHT = 60;
+  const TIME_COL = 44;
+  const totalHeight = hourRange.length * ROW_HEIGHT;
+
+  let header = `<div style="position:sticky;top:0;background:var(--bg);z-index:10;display:grid;grid-template-columns:${TIME_COL}px repeat(7,1fr);gap:2px;margin-bottom:2px;padding-bottom:6px;border-bottom:1px solid var(--border)">
+    <div></div>`;
+  weekDates.forEach((d,i) => {
+    const isToday = d.toISOString().slice(0,10) === todayKey;
+    header += `<div style="text-align:center;padding:6px 2px;background:${isToday?'#ff525210':'transparent'};border-radius:8px">
+      <div style="font-size:10px;color:${isToday?'var(--accent)':'var(--text2)'};font-weight:800;letter-spacing:.5px">${DAYS_GRID[i]}</div>
+      <div style="font-size:14px;font-weight:800;color:${isToday?'var(--accent)':'var(--text)'};margin-top:1px">${d.getDate()}</div>
+    </div>`;
+  });
+  header += '</div>';
+
+  let gridBody = `<div style="position:relative;display:grid;grid-template-columns:${TIME_COL}px repeat(7,1fr);gap:2px">`;
+  gridBody += `<div style="display:flex;flex-direction:column">`;
+  hourRange.forEach(h => {
+    gridBody += `<div style="height:${ROW_HEIGHT}px;font-size:10px;color:var(--text3);padding-top:0;text-align:right;padding-right:5px">${String(h).padStart(2,'0')}:00</div>`;
+  });
+  gridBody += `</div>`;
+
+  for(let col = 0; col < 7; col++) {
+    const dayIdx = dayIndexMap[col];
+    const date = weekDates[col];
+    const isToday = date.toISOString().slice(0,10) === todayKey;
+    gridBody += `<div style="position:relative;background:${isToday?'#ff525208':'transparent'};border-radius:6px;height:${totalHeight}px">`;
+    hourRange.forEach((h,hi) => {
+      gridBody += `<div style="position:absolute;left:0;right:0;top:${hi*ROW_HEIGHT}px;height:${ROW_HEIGHT}px;border-top:1px solid #ffffff08"></div>`;
+    });
+
+    const dayStudents = students.filter(s => s.days && s.days.includes(dayIdx));
+    dayStudents.forEach(s => {
+      const startTime = s.times?.[String(dayIdx)] || s.time || '06:00';
+      const endTime = s.endTime || addMinutes(startTime, 60);
+      const [sh, sm] = startTime.split(':').map(Number);
+      const [eh, em] = endTime.split(':').map(Number);
+      const startMin = sh*60 + sm;
+      const endMin = eh*60 + em;
+      const topPx = ((sh - minH) * 60 + sm) * (ROW_HEIGHT/60);
+      const heightPx = Math.max(28, ((endMin - startMin) * (ROW_HEIGHT/60)) - 2);
+      const color = getColor(s.name);
+      const firstName = s.name.split(' ')[0];
+      gridBody += `<div onclick="showStudentDetail('${s.id}')"
+        style="position:absolute;left:2px;right:2px;top:${topPx}px;height:${heightPx}px;background:${color}cc;color:#fff;border-radius:6px;padding:4px 5px;font-size:10px;font-weight:700;cursor:pointer;overflow:hidden;line-height:1.15;box-shadow:0 1px 3px #00000060;border-left:3px solid ${color}">
+        ${firstName.length > 8 ? firstName.slice(0,7)+'…' : firstName}
+        <div style="font-size:8px;opacity:.85;font-weight:600;margin-top:1px">${startTime}</div>
+      </div>`;
+    });
+    gridBody += `</div>`;
+  }
+  gridBody += `</div>`;
+
+  grid.innerHTML = header + gridBody;
+}
+
+function renderScheduleList(dow) {
   let html = '';
   DAYS_SHORT.forEach((d,i)=>{
-    const isToday = i === dow;
     const isSelected = i === selectedWeekDay;
     const dayCount = students.filter(s=>s.days && s.days.includes(i)).length;
     html += `<div class="week-day-col ${isSelected?'active':''}" onclick="selectedWeekDay=${i};renderSchedule()">
