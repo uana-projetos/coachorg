@@ -1141,6 +1141,14 @@ body {
     </div>
   </div>
 
+  <div class="section-title" style="margin-top:30px">📤 Compartilhar</div>
+  <div class="card" style="background:linear-gradient(135deg,#1a1a2e,#2a1a2e);border:1.5px solid #ffab0040">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px">Gere cards visuais pra postar</div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:12px">Imagens prontas pra Instagram, WhatsApp, Stories. Marca CoachOrg discreta.</div>
+    <button onclick="shareSemanalCard()" style="width:100%;background:#ffab00;color:#0f0f1a;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:13px;margin-bottom:8px">📊 Compartilhar Minha Semana</button>
+    <div style="font-size:10px;color:var(--text3);line-height:1.5;text-align:center">💡 Outros cards: na lista de alunos toca em qualquer aluno → <strong>🏆 Compartilhar conquista</strong> · Nos treinos do aluno → <strong>📤 Compartilhar</strong></div>
+  </div>
+
   <div class="section-title" style="margin-top:30px">📅 Sincronizar Calendário</div>
   <div class="card" style="background:linear-gradient(135deg,#1a1a2e,#0f2a40);border:1.5px solid #5b8cff40">
     <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text)">Exportar agenda pra Google / Apple Calendar</div>
@@ -3642,6 +3650,262 @@ function buildMonthCalendar(studentId) {
 }
 
 // SEND WORKOUT VIA WHATSAPP
+// === COMPARTILHAMENTO DE CARDS ===
+function _initShareCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080; canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  // Background gradient
+  const bg = ctx.createLinearGradient(0, 0, 1080, 1080);
+  bg.addColorStop(0, '#1a1a2e');
+  bg.addColorStop(1, '#0a0a14');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 1080, 1080);
+  // Subtle red glow top right
+  const glow = ctx.createRadialGradient(820, 280, 0, 820, 280, 480);
+  glow.addColorStop(0, 'rgba(255,82,82,0.25)');
+  glow.addColorStop(1, 'rgba(255,82,82,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 1080, 1080);
+  return { canvas, ctx };
+}
+
+function _drawCoachOrgLogo(ctx, x, y, size) {
+  const bw = size * 0.7;
+  const bh = size * 0.08;
+  const gap = size * 0.04;
+  ctx.fillStyle = '#ff5252';
+  for(let i = 0; i < 4; i++) {
+    ctx.globalAlpha = [1, 0.7, 0.4, 0.2][i];
+    ctx.beginPath();
+    const yy = y + i * (bh + gap);
+    const radius = bh / 2;
+    ctx.moveTo(x + radius, yy);
+    ctx.arcTo(x + bw, yy, x + bw, yy + bh, radius);
+    ctx.arcTo(x + bw, yy + bh, x, yy + bh, radius);
+    ctx.arcTo(x, yy + bh, x, yy, radius);
+    ctx.arcTo(x, yy, x + bw, yy, radius);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function _drawCoachOrgFooter(ctx) {
+  // Logo small + text bottom
+  _drawCoachOrgLogo(ctx, 70, 940, 100);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 26px Arial, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('CoachOrg', 200, 970);
+  ctx.fillStyle = '#999';
+  ctx.font = '18px Arial, sans-serif';
+  ctx.fillText('Organize. Cresça. Não perca aluno.', 200, 1000);
+}
+
+function generateTreinoCardBlob(student, workout) {
+  return new Promise(resolve => {
+    const { canvas, ctx } = _initShareCanvas();
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 22px Arial, sans-serif';
+    ctx.fillStyle = '#ff5252';
+    ctx.fillText('TREINO PARA', 80, 110);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 64px Arial, sans-serif';
+    ctx.fillText((student.name || 'Aluno').toUpperCase(), 80, 180);
+    ctx.font = '24px Arial, sans-serif';
+    ctx.fillStyle = '#aaa';
+    const info = [];
+    if(student.days?.length) info.push(student.days.length + 'x/semana');
+    if(workout.name) info.push(workout.name);
+    if(student.goal) info.push(student.goal);
+    ctx.fillText(info.join(' · '), 80, 230);
+    // Linha
+    ctx.fillStyle = '#ff5252';
+    ctx.fillRect(80, 270, 200, 4);
+    // Exercícios
+    const exercises = (workout.exercises || '').split('\n').filter(l => l.trim()).slice(0, 10);
+    ctx.font = '28px Arial, sans-serif';
+    ctx.fillStyle = '#fff';
+    let y = 350;
+    exercises.forEach((line, i) => {
+      ctx.fillStyle = '#ff5252';
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.fillText(String(i+1).padStart(2, '0') + '.', 80, y);
+      ctx.fillStyle = '#fff';
+      ctx.font = '28px Arial, sans-serif';
+      const text = line.replace(/^\d+\.?\s*/, '');
+      ctx.fillText(text.length > 40 ? text.slice(0, 38) + '...' : text, 150, y);
+      y += 52;
+    });
+    _drawCoachOrgFooter(ctx);
+    canvas.toBlob(blob => resolve(blob), 'image/png');
+  });
+}
+
+function generateConquistaCardBlob(studentName, exercise, weight, prevWeight, period) {
+  return new Promise(resolve => {
+    const { canvas, ctx } = _initShareCanvas();
+    // Trophy emoji area
+    ctx.font = 'bold 80px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆', 540, 180);
+    ctx.font = 'bold 26px Arial, sans-serif';
+    ctx.fillStyle = '#ffab00';
+    ctx.fillText('NOVO RECORDE!', 540, 230);
+    // Student name
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 56px Arial, sans-serif';
+    ctx.fillText((studentName || 'ALUNO').toUpperCase(), 540, 350);
+    // Exercise
+    ctx.fillStyle = '#999';
+    ctx.font = 'bold 32px Arial, sans-serif';
+    ctx.fillText((exercise || '').toUpperCase(), 540, 430);
+    // Weight big
+    ctx.fillStyle = '#ff5252';
+    ctx.font = 'bold 180px Arial, sans-serif';
+    ctx.fillText(weight + 'kg', 540, 620);
+    if(prevWeight && +prevWeight < +weight) {
+      ctx.fillStyle = '#666';
+      ctx.font = 'bold 24px Arial, sans-serif';
+      ctx.fillText('(era ' + prevWeight + 'kg)', 540, 680);
+      const diff = +weight - +prevWeight;
+      ctx.fillStyle = '#4ade80';
+      ctx.font = 'bold 38px Arial, sans-serif';
+      ctx.fillText('+' + diff + 'kg' + (period ? ' em ' + period : ''), 540, 770);
+    }
+    _drawCoachOrgFooter(ctx);
+    canvas.toBlob(blob => resolve(blob), 'image/png');
+  });
+}
+
+function generateSemanalCardBlob() {
+  const today = new Date();
+  const dow = today.getDay();
+  const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - dow);
+  const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
+  // Count sessions of the week
+  let sessions = 0;
+  let attendances = 0;
+  const activeStudents = new Set();
+  for(let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i);
+    if(d > today) break;
+    const dayDow = d.getDay();
+    const dayKey = d.toISOString().slice(0,10);
+    students.forEach(s => {
+      if(s.days?.includes(dayDow)) {
+        sessions++;
+        activeStudents.add(s.id);
+        if(attendance[dayKey + '_' + s.id]) attendances++;
+      }
+    });
+  }
+  const presencePct = sessions > 0 ? Math.round(attendances / sessions * 100) : 0;
+  const revenue = students.filter(s => isPaymentDone(s.id)).reduce((sum, s) => sum + (parseFloat(s.value) || 0), 0);
+  const monthName = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][today.getMonth()];
+  const dateStr = startOfWeek.getDate() + '-' + endOfWeek.getDate() + ' ' + monthName;
+  return new Promise(resolve => {
+    const { canvas, ctx } = _initShareCanvas();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff5252';
+    ctx.font = 'bold 22px Arial, sans-serif';
+    ctx.fillText('MINHA SEMANA · ' + dateStr.toUpperCase(), 80, 110);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 56px Arial, sans-serif';
+    ctx.fillText('Personal Trainer', 80, 200);
+    ctx.fillStyle = '#ff5252';
+    ctx.fillRect(80, 240, 200, 4);
+    // 4 stats blocks
+    const stats = [
+      { label: 'SESSÕES', val: sessions, color: '#ff5252' },
+      { label: 'ALUNOS ATIVOS', val: activeStudents.size, color: '#4ade80' },
+      { label: 'PRESENÇA', val: presencePct + '%', color: '#5b8cff' },
+      { label: 'RECEITA', val: 'R$' + Math.round(revenue), color: '#ffab00' }
+    ];
+    stats.forEach((s, i) => {
+      const row = Math.floor(i / 2);
+      const col = i % 2;
+      const x = 80 + col * 480;
+      const y = 340 + row * 250;
+      ctx.fillStyle = '#1a1a2e';
+      ctx.strokeStyle = s.color + '40';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const w = 440, h = 200, r = 24;
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = s.color;
+      ctx.font = 'bold 76px Arial, sans-serif';
+      ctx.fillText(String(s.val), x + w/2, y + 110);
+      ctx.fillStyle = '#999';
+      ctx.font = 'bold 22px Arial, sans-serif';
+      ctx.fillText(s.label, x + w/2, y + 160);
+    });
+    _drawCoachOrgFooter(ctx);
+    canvas.toBlob(blob => resolve(blob), 'image/png');
+  });
+}
+
+async function shareBlob(blob, filename, title, text) {
+  if(!blob) { showToast('Erro ao gerar imagem'); return; }
+  const file = new File([blob], filename, { type: 'image/png' });
+  if(navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ title, text, files: [file] });
+      return;
+    } catch(e) { if(e.name !== 'AbortError') console.warn('share error', e); }
+  }
+  // Fallback: download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('📥 Imagem baixada — compartilhe manualmente');
+}
+
+async function shareTreinoCard(studentId, workoutIdx) {
+  const s = students.find(x => x.id === studentId);
+  if(!s) return;
+  const w = s.workouts?.[workoutIdx];
+  if(!w) return;
+  showToast('🎨 Gerando card...');
+  const blob = await generateTreinoCardBlob(s, w);
+  shareBlob(blob, 'treino-' + s.name.split(' ')[0].toLowerCase() + '.png',
+    'Treino de ' + s.name, 'Treino criado no CoachOrg 🏋️');
+}
+
+async function shareConquistaCardFromStudent(studentId) {
+  const s = students.find(x => x.id === studentId);
+  if(!s) return;
+  const exercise = prompt('Qual exercício? (ex: Supino reto)', 'Supino reto');
+  if(!exercise) return;
+  const weight = prompt('Peso novo (kg):', '100');
+  if(!weight) return;
+  const prevWeight = prompt('Peso anterior (kg, opcional):', '');
+  const period = prompt('Período de evolução (opcional, ex: 8 semanas):', '');
+  showToast('🎨 Gerando card de conquista...');
+  const blob = await generateConquistaCardBlob(s.name, exercise, weight, prevWeight, period);
+  shareBlob(blob, 'recorde-' + s.name.split(' ')[0].toLowerCase() + '.png',
+    'Novo recorde: ' + s.name, '🏆 Bate-recorde no CoachOrg!');
+}
+
+async function shareSemanalCard() {
+  showToast('🎨 Gerando resumo da semana...');
+  const blob = await generateSemanalCardBlob();
+  shareBlob(blob, 'minha-semana.png',
+    'Minha semana como Personal', '📊 Resumo semanal feito no CoachOrg 🏋️');
+}
+
 function sendWorkoutWhatsApp(studentId, workoutIdx) {
   const s = students.find(x=>x.id===studentId);
   if(!s || !s.phone) { showToast('Aluno sem telefone'); return; }
@@ -3742,8 +4006,9 @@ function showStudentDetail(id) {
             <div class="workout-title">${w.name}</div>
             ${expBadge}
           </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
+          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
             ${s.phone?`<button class="wa-btn wa-btn-small" style="padding:4px 8px;font-size:10px" onclick="sendWorkoutWhatsApp('${s.id}',${i})">${waIcon()} Enviar</button>`:''}
+            <button class="detail-action-btn" style="padding:4px 10px;font-size:11px;color:#5b8cff;border-color:#5b8cff40" onclick="shareTreinoCard('${s.id}',${i})">📤 Compartilhar</button>
             <button class="detail-action-btn" style="padding:4px 10px;font-size:11px" onclick="editWorkout('${s.id}',${i})">Editar</button>
             <button class="detail-action-btn" style="padding:4px 10px;font-size:11px;color:var(--accent);border-color:var(--accent)" onclick="deleteWorkout('${s.id}',${i})">X</button>
           </div>
@@ -3773,6 +4038,9 @@ function showStudentDetail(id) {
         ${s.email?`<button class="email-btn email-btn-outline" style="font-size:11px;padding:6px 10px" onclick="sendPayEmail('${s.id}')">
           ✉ Cobrar Email
         </button>`:''}
+        <button class="detail-action-btn" style="color:#ffab00;border-color:#ffab0040" onclick="shareConquistaCardFromStudent('${s.id}')">
+          🏆 Compartilhar conquista
+        </button>
       </div>
     </div>
 
