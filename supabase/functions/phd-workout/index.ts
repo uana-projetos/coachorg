@@ -79,7 +79,7 @@ Responda APENAS o array JSON. Sem texto antes ou depois.`;
 }
 
 async function callGemini(systemPrompt: string, userPrompt: string): Promise<any[]> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
