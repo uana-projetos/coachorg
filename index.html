@@ -3844,10 +3844,11 @@ function generateSemanalCardBlob() {
   const dow = today.getDay();
   const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - dow);
   const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
-  // Count sessions of the week
-  let sessions = 0;
-  let attendances = 0;
+
+  let sessions = 0, presentes = 0, faltas = 0;
   const activeStudents = new Set();
+  const studentPresence = {};
+
   for(let i = 0; i < 7; i++) {
     const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i);
     if(d > today) break;
@@ -3857,14 +3858,24 @@ function generateSemanalCardBlob() {
       if(s.days?.includes(dayDow)) {
         sessions++;
         activeStudents.add(s.id);
-        if(attendance[dayKey + '_' + s.id]) attendances++;
+        studentPresence[s.id] = studentPresence[s.id] || { name: s.name, total: 0, present: 0 };
+        studentPresence[s.id].total++;
+        const att = attendance[dayKey + '_' + s.id];
+        if(att === true) { presentes++; studentPresence[s.id].present++; }
+        else if(att === false) faltas++;
       }
     });
   }
-  const presencePct = sessions > 0 ? Math.round(attendances / sessions * 100) : 0;
-  const revenue = students.filter(s => isPaymentDone(s.id)).reduce((sum, s) => sum + (parseFloat(s.value) || 0), 0);
+
+  // Pódio: top 3 com maior presença esta semana (mínimo 1 presença pra entrar)
+  const podio = Object.values(studentPresence)
+    .filter(s => s.present > 0)
+    .sort((a,b) => b.present - a.present || b.total - a.total)
+    .slice(0,3);
+
   const monthName = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][today.getMonth()];
   const dateStr = startOfWeek.getDate() + '-' + endOfWeek.getDate() + ' ' + monthName;
+
   return new Promise(resolve => {
     const { canvas, ctx } = _initShareCanvas();
     ctx.textAlign = 'left';
@@ -3872,27 +3883,25 @@ function generateSemanalCardBlob() {
     ctx.font = 'bold 22px Arial, sans-serif';
     ctx.fillText('MINHA SEMANA · ' + dateStr.toUpperCase(), 80, 110);
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 56px Arial, sans-serif';
-    ctx.fillText('Personal Trainer', 80, 200);
+    ctx.font = 'bold 50px Arial, sans-serif';
+    ctx.fillText('Como foi a semana', 80, 180);
     ctx.fillStyle = '#ff5252';
-    ctx.fillRect(80, 240, 200, 4);
-    // 4 stats blocks
+    ctx.fillRect(80, 215, 200, 4);
+
+    // 3 stats blocks (presentes / faltas / sessões)
     const stats = [
-      { label: 'SESSÕES', val: sessions, color: '#ff5252' },
-      { label: 'ALUNOS ATIVOS', val: activeStudents.size, color: '#4ade80' },
-      { label: 'PRESENÇA', val: presencePct + '%', color: '#5b8cff' },
-      { label: 'RECEITA', val: 'R$' + Math.round(revenue), color: '#ffab00' }
+      { label: 'PRESENTES', val: presentes, color: '#4ade80', icon: '✓' },
+      { label: 'FALTAS', val: faltas, color: '#ff5252', icon: '✗' },
+      { label: 'SESSÕES', val: sessions, color: '#5b8cff', icon: '🏋️' }
     ];
     stats.forEach((s, i) => {
-      const row = Math.floor(i / 2);
-      const col = i % 2;
-      const x = 80 + col * 480;
-      const y = 340 + row * 250;
+      const x = 80 + i * 310;
+      const y = 270;
       ctx.fillStyle = '#1a1a2e';
       ctx.strokeStyle = s.color + '40';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      const w = 440, h = 200, r = 24;
+      const w = 290, h = 160, r = 20;
       ctx.moveTo(x + r, y);
       ctx.arcTo(x + w, y, x + w, y + h, r);
       ctx.arcTo(x + w, y + h, x, y + h, r);
@@ -3903,12 +3912,64 @@ function generateSemanalCardBlob() {
       ctx.stroke();
       ctx.textAlign = 'center';
       ctx.fillStyle = s.color;
-      ctx.font = 'bold 76px Arial, sans-serif';
-      ctx.fillText(String(s.val), x + w/2, y + 110);
+      ctx.font = 'bold 70px Arial, sans-serif';
+      ctx.fillText(String(s.val), x + w/2, y + 85);
       ctx.fillStyle = '#999';
-      ctx.font = 'bold 22px Arial, sans-serif';
-      ctx.fillText(s.label, x + w/2, y + 160);
+      ctx.font = 'bold 18px Arial, sans-serif';
+      ctx.fillText(s.label, x + w/2, y + 130);
     });
+
+    // Pódio
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffab00';
+    ctx.font = 'bold 26px Arial, sans-serif';
+    ctx.fillText('🏆 PÓDIO DA SEMANA', 80, 510);
+    ctx.fillStyle = '#999';
+    ctx.font = '18px Arial, sans-serif';
+    ctx.fillText('Alunos com melhor presença', 80, 540);
+
+    if(podio.length === 0) {
+      ctx.fillStyle = '#666';
+      ctx.font = 'italic 24px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sem presenças marcadas ainda', 540, 700);
+    } else {
+      const medals = ['🥇','🥈','🥉'];
+      const colors = ['#ffd700','#c0c0c0','#cd7f32'];
+      podio.forEach((p, i) => {
+        const y = 590 + i * 110;
+        // Background card
+        ctx.fillStyle = '#1a1a2e';
+        ctx.strokeStyle = colors[i] + '60';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const x = 80, w = 920, h = 90, r = 16;
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Medal
+        ctx.font = 'bold 48px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(medals[i], 130, y + 60);
+        // Name
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 30px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        const firstName = p.name.split(' ').slice(0,2).join(' ');
+        const displayName = firstName.length > 22 ? firstName.slice(0,21) + '…' : firstName;
+        ctx.fillText(displayName.toUpperCase(), 190, y + 45);
+        // Presence
+        ctx.fillStyle = colors[i];
+        ctx.font = 'bold 18px Arial, sans-serif';
+        ctx.fillText(p.present + '/' + p.total + ' presenças (' + Math.round(p.present/p.total*100) + '%)', 190, y + 72);
+      });
+    }
+
     _drawCoachOrgFooter(ctx);
     canvas.toBlob(blob => resolve(blob), 'image/png');
   });
