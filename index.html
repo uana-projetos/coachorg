@@ -1365,6 +1365,21 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
           <button type="button" onclick="document.getElementById('spkImgInput').click()" style="flex:1;background:var(--bg);border:1.5px dashed #5b8cff60;border-radius:8px;color:#5b8cff;padding:9px;font-size:11px;font-weight:700;cursor:pointer">📷 Escolher foto</button>
           <button type="button" onclick="setShareImageClear()" style="background:var(--bg);border:1.5px solid var(--border);color:var(--text2);border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer">×</button>
         </div>
+
+        <!-- Mensagem WhatsApp inteligente (só pra treino) -->
+        <div id="spkWaSection" style="display:none;border-top:1px solid var(--border);padding-top:14px">
+          <label style="font-size:10px;color:var(--text2);font-weight:700">💬 Mensagem WhatsApp <span id="spkTreinoTipo" style="font-size:9px;color:#5b8cff;font-weight:700"></span></label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:4px;margin-bottom:8px">
+            <button type="button" onclick="setWaTemplate('inferiores')" data-tpl="inferiores" class="share-opt-btn">🦵 Inferiores</button>
+            <button type="button" onclick="setWaTemplate('superiores')" data-tpl="superiores" class="share-opt-btn">💪 Superiores</button>
+            <button type="button" onclick="setWaTemplate('cardio')" data-tpl="cardio" class="share-opt-btn">🔥 HIIT/Cardio</button>
+            <button type="button" onclick="setWaTemplate('fullbody')" data-tpl="fullbody" class="share-opt-btn">🏋️ Full Body</button>
+            <button type="button" onclick="setWaTemplate('reab')" data-tpl="reab" class="share-opt-btn">🌱 Reabilitação</button>
+            <button type="button" onclick="setWaTemplate('custom')" data-tpl="custom" class="share-opt-btn">✏️ Personalizada</button>
+          </div>
+          <textarea id="spkWaMensagem" rows="6" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:9px 11px;font-size:12px;resize:vertical;font-family:inherit;margin-bottom:8px;line-height:1.5"></textarea>
+          <div style="font-size:9px;color:var(--text3);line-height:1.5">Variáveis: <strong>{nome}</strong> {treino} {exercicios}. Edite à vontade — fica salvo só nessa mensagem.</div>
+        </div>
       </div>
 
       <button onclick="confirmarSharePicker()" id="btnConfirmarShare" style="width:100%;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-size:14px">📤 Compartilhar (qualquer app)</button>
@@ -5735,6 +5750,136 @@ async function shareBlob(blob, filename, title, text) {
 // ===== Compartilhamento com seletor de formato =====
 let _sharePending = null; // { type:'treino'|'semanal', studentId?, workoutIdx? }
 
+// Detecta tipo de treino olhando os exercícios
+const _WORDS_INFERIOR = ['agachament','leg press','stiff','panturrilh','gluteo','glúteo','flexora','extensora','passada','afundo','elevação pélvica','búlgaro','hip thrust','levantamento terra'];
+const _WORDS_SUPERIOR = ['supino','crucifixo','desenvolvimento','elevação lateral','remada','puxada','rosca','tríceps','triceps','pulley','arnold','peck deck','encolhimento'];
+const _WORDS_CARDIO = ['corrida','esteira','bike','hiit','burpee','jumping jack','pula corda','escada','sprint','running'];
+const _WORDS_FUNCIONAL = ['kettlebell','tre prancha','funcional','medicine ball','sandbag','battle rope','swing','clean','snatch'];
+const _WORDS_REAB = ['mobilid','alongamento','estabilização','propriocep','core','isometria','liberação','reabilit'];
+
+function detectarTipoTreino(workout) {
+  const text = ((workout?.exercises || '') + ' ' + (workout?.name || '')).toLowerCase();
+  let scores = { inferiores:0, superiores:0, cardio:0, fullbody:0, reab:0 };
+  _WORDS_INFERIOR.forEach(w => { if(text.includes(w)) scores.inferiores += 1; });
+  _WORDS_SUPERIOR.forEach(w => { if(text.includes(w)) scores.superiores += 1; });
+  _WORDS_CARDIO.forEach(w => { if(text.includes(w)) scores.cardio += 1; });
+  _WORDS_FUNCIONAL.forEach(w => { if(text.includes(w)) scores.fullbody += 1; });
+  _WORDS_REAB.forEach(w => { if(text.includes(w)) scores.reab += 1; });
+  // Se inferiores E superiores marcam ≥2 cada, é full body
+  if(scores.inferiores >= 2 && scores.superiores >= 2) return 'fullbody';
+  // Pega o maior
+  const max = Math.max(...Object.values(scores));
+  if(max === 0) return 'fullbody';
+  return Object.keys(scores).find(k => scores[k] === max);
+}
+
+const _WA_TEMPLATE_LABELS = {
+  inferiores: '🦵 Inferiores detectado',
+  superiores: '💪 Superiores detectado',
+  cardio: '🔥 HIIT/Cardio detectado',
+  fullbody: '🏋️ Full body detectado',
+  reab: '🌱 Reabilitação detectado',
+  custom: '✏️ Personalizada'
+};
+
+const _WA_TEMPLATES = {
+  inferiores: `Oi {nome}! Hoje vamos detonar inferiores 🦵🔥
+
+📋 *{treino}*
+{exercicios}
+
+⚡ DICAS PRA HOJE:
+• Come 1-2h antes (carbo + proteína)
+• Leva 1L de água — vai precisar
+• Aquecimento articular 5min essencial
+• Foco no joelho alinhado
+
+Bora? 💪`,
+
+  superiores: `Oi {nome}! Treino de superiores hoje 💪
+
+📋 *{treino}*
+{exercicios}
+
+⚡ DICAS:
+• Aquecimento de ombro 5min antes
+• Hidratação: 500ml antes, 500ml durante
+• Foco na contração, não no peso
+
+Te espero! 🔥`,
+
+  cardio: `Oi {nome}! HIIT/Cardio hoje 🔥⚡
+
+📋 *{treino}*
+{exercicios}
+
+⚡ ATENÇÃO HOJE:
+• Come 2h antes — leve, fácil digerir
+• Leva 1,5L de água
+• Toalha + roupa pra trocar
+• Vamo intenso!
+
+Te espero 💨`,
+
+  fullbody: `Oi {nome}! Full body hoje 🏋️
+
+📋 *{treino}*
+{exercicios}
+
+⚡ LEMBRA:
+• Refeição 1-2h antes (carbo + proteína)
+• 1L de água — vai precisar
+• Aquecimento geral 5min
+• Foco e técnica em cada movimento
+
+Bora? 💪`,
+
+  reab: `Oi {nome}! Treino de hoje 🌱
+
+📋 *{treino}*
+{exercicios}
+
+💚 IMPORTANTE:
+• Sem dor — qualquer desconforto avisa
+• Hidratação constante
+• Foco no movimento, sem pressa
+
+A gente vai no seu ritmo 🙏`,
+
+  custom: `Oi {nome}! Segue seu treino:
+
+📋 *{treino}*
+{exercicios}
+
+Bora treinar! 💪`
+};
+
+let _waTemplateAtivo = 'fullbody';
+
+function setWaTemplate(tipo) {
+  _waTemplateAtivo = tipo;
+  // Atualiza visual dos botões
+  document.querySelectorAll('.share-opt-btn[data-tpl]').forEach(b => {
+    b.classList.toggle('active', b.dataset.tpl === tipo);
+  });
+  // Preenche textarea com template (preserva edição custom)
+  if(tipo === 'custom' && document.getElementById('spkWaMensagem').value.trim()) return;
+  const ta = document.getElementById('spkWaMensagem');
+  if(!ta) return;
+  const tpl = _WA_TEMPLATES[tipo] || _WA_TEMPLATES.fullbody;
+  const ctx = _sharePending;
+  const s = students.find(x => x.id === ctx?.studentId);
+  const w = s?.workouts?.[ctx?.workoutIdx];
+  if(s && w) {
+    ta.value = tpl
+      .replace(/\{nome\}/g, s.name.split(' ')[0])
+      .replace(/\{treino\}/g, w.name || 'Treino')
+      .replace(/\{exercicios\}/g, w.exercises || '');
+  } else {
+    ta.value = tpl;
+  }
+}
+
 function setShareOpt(opt, val) {
   _shareOpts[opt] = val;
   document.querySelectorAll(`.share-opt-btn[data-opt="${opt}"], .share-color-btn[data-opt="${opt}"]`).forEach(b => {
@@ -5775,9 +5920,10 @@ function abrirSharePicker(type, ctx) {
   const status = document.getElementById('spkImgStatus');
   if(status) status.textContent = _shareOpts.imageDataUrl ? '✅ foto carregada' : '';
 
-  // Mostra botão "enviar pro aluno" só se for treino com phone
+  // Mostra botão "enviar pro aluno" + bloco WA mensagem só se for treino com phone
   const btnAluno = document.getElementById('btnEnviarAluno');
   const hint = document.getElementById('enviarAlunoHint');
+  const waSection = document.getElementById('spkWaSection');
   if(type === 'treino' && ctx?.studentId) {
     const s = students.find(x => x.id === ctx.studentId);
     if(s?.phone) {
@@ -5785,13 +5931,22 @@ function abrirSharePicker(type, ctx) {
       document.getElementById('btnEnviarAlunoNome').textContent = firstName;
       btnAluno.style.display = '';
       hint.style.display = '';
+      // Detecta tipo automaticamente e pré-preenche mensagem
+      const w = s.workouts?.[ctx.workoutIdx];
+      const tipoAuto = detectarTipoTreino(w);
+      const tipoLabel = document.getElementById('spkTreinoTipo');
+      if(tipoLabel) tipoLabel.textContent = '(' + _WA_TEMPLATE_LABELS[tipoAuto] + ')';
+      if(waSection) waSection.style.display = '';
+      setWaTemplate(tipoAuto);
     } else {
       btnAluno.style.display = 'none';
       hint.style.display = 'none';
+      if(waSection) waSection.style.display = 'none';
     }
   } else {
     btnAluno.style.display = 'none';
     hint.style.display = 'none';
+    if(waSection) waSection.style.display = 'none';
   }
 
   document.getElementById('modalSharePicker').style.display = 'flex';
@@ -5819,9 +5974,12 @@ async function enviarTreinoAlunoWa() {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    // 2. Abre WhatsApp com texto do treino
+    // 2. Abre WhatsApp com texto do treino (usa mensagem customizada do textarea)
     const firstName = s.name.split(' ')[0];
-    const msg = `Oi ${firstName}! Segue seu treino:\n\n*${w.name || 'Treino'}*\n\n${w.exercises}\n\nBora treinar! 💪`;
+    const taMsg = document.getElementById('spkWaMensagem')?.value?.trim();
+    const msg = taMsg && taMsg.length > 10
+      ? taMsg
+      : `Oi ${firstName}! Segue seu treino:\n\n*${w.name || 'Treino'}*\n\n${w.exercises}\n\nBora treinar! 💪`;
     const phone = formatPhone(s.phone);
 
     fecharSharePicker();
