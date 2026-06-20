@@ -570,6 +570,14 @@ body {
 details.config-section summary::-webkit-details-marker { display:none; }
 details.config-section[open] .config-chevron { transform:rotate(180deg); }
 details.config-section .config-chevron { transition: transform .2s; display:inline-block }
+.menu-mais-btn {
+  background:var(--bg); border:1.5px solid var(--border); color:var(--text);
+  border-radius:10px; padding:11px 14px; font-size:13px; font-weight:600;
+  cursor:pointer; text-align:left; display:flex; justify-content:space-between;
+  align-items:center; font-family:inherit;
+}
+.menu-mais-btn:hover { background:var(--card); border-color:#5b8cff60; }
+.menu-mais-btn > span { color:var(--text3); font-size:14px; }
 .toggle {
   width:48px; height:28px; border-radius:14px; background:#ffffff20;
   position:relative; cursor:pointer; transition:.2s; border:none;
@@ -849,6 +857,16 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
 
 <!-- PAGE: HOME -->
 <div class="page active" id="pageHome">
+
+  <!-- Saudação + Menu Mais -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div>
+      <div id="homeSaudacao" style="font-size:16px;font-weight:800;color:var(--text)">Olá 👋</div>
+      <div id="homeResumoLinha" style="font-size:11px;color:var(--text2);margin-top:2px">—</div>
+    </div>
+    <button onclick="abrirMenuMais()" style="background:var(--card);border:1.5px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center" title="Mais">⋯</button>
+  </div>
+
   <div class="summary-row">
     <div class="summary-card" style="background:linear-gradient(135deg,#ff525210,#ff525225);border-color:#ff525230">
       <div class="num" style="color:#ff5252" id="totalStudents">0</div>
@@ -867,6 +885,12 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       <div class="label">Receita Mês</div>
     </div>
   </div>
+
+  <!-- ✦ COACH IA (movido da aba Coach IA) -->
+  <div id="homeCoachIA"></div>
+
+  <!-- 🎯 META FINANCEIRA -->
+  <div id="homeMetaCard"></div>
 
   <div id="installBanner" style="display:none;background:linear-gradient(90deg,#ff5252,#ff1744);border-radius:14px;padding:12px 14px;margin-bottom:12px;color:#fff;display:none;align-items:center;gap:12px;cursor:pointer" onclick="triggerInstall()">
     <div style="font-size:22px;flex-shrink:0">📲</div>
@@ -1121,6 +1145,63 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     </div>
   </div>
 
+  <!-- Modal: Menu "Mais" -->
+  <div id="modalMenuMais" class="modal" style="display:none">
+    <div class="modal-content" style="max-width:440px;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;position:sticky;top:0;background:var(--card);padding-top:4px;z-index:5">
+        <div style="font-size:16px;font-weight:800">⋯ Mais</div>
+        <button onclick="fecharMenuMais()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer">×</button>
+      </div>
+
+      <!-- 🎁 Indique amigo (visível, destaque) -->
+      <button onclick="fecharMenuMais();showPage('settings');setTimeout(()=>document.getElementById('referralPanel')?.scrollIntoView({behavior:'smooth'}),200)" style="width:100%;background:linear-gradient(90deg,#ffab00,#ff6d00);color:#0f0f1a;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="font-size:22px">🎁</span>
+        <div>
+          <div>Indique amigo · ganhe R$50</div>
+          <div style="font-size:10px;font-weight:600;opacity:.8">Ele ganha 30 dias grátis, você fica com R$50</div>
+        </div>
+      </button>
+
+      <!-- ⚙️ Configurações -->
+      <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:6px">⚙️ CONFIGURAÇÕES</div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+        <button onclick="fecharMenuMais();showPage('settings');setTimeout(()=>document.getElementById('pushBtn')?.scrollIntoView({behavior:'smooth'}),200)" class="menu-mais-btn">🔔 Notificações & Lembretes <span>›</span></button>
+        <button onclick="fecharMenuMais();showPage('settings');setTimeout(()=>document.getElementById('toggleWhatsappNotif')?.scrollIntoView({behavior:'smooth'}),200)" class="menu-mais-btn">💬 WhatsApp Automático <span>›</span></button>
+      </div>
+
+      <!-- 📤 Compartilhar -->
+      <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:6px">📤 COMPARTILHAR</div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+        <button onclick="fecharMenuMais();shareSemanalCard()" class="menu-mais-btn">📊 Card da semana <span>›</span></button>
+        <button onclick="fecharMenuMais();downloadICS()" class="menu-mais-btn">📅 Sincronizar Calendário <span>›</span></button>
+      </div>
+
+      <!-- 🔧 Conta & Dados -->
+      <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:6px">🔧 CONTA & DADOS</div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+        <button onclick="fecharMenuMais();openLoginModal()" class="menu-mais-btn">👤 Minha Conta <span>›</span></button>
+        <button onclick="fecharMenuMais();exportData()" class="menu-mais-btn">💾 Exportar Dados <span>›</span></button>
+        <button onclick="fecharMenuMais();document.getElementById('importFile')?.click()" class="menu-mais-btn">📥 Importar Backup <span>›</span></button>
+      </div>
+
+      <!-- 🌟 Avaliar / Sobre -->
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+        <button onclick="fecharMenuMais();openRatingModal()" class="menu-mais-btn">🌟 Avaliar o app <span>›</span></button>
+      </div>
+
+      <!-- 🛠️ Admin (só pra Uaná) -->
+      <div id="menuMaisAdmin" style="display:none">
+        <div style="font-size:10px;color:#ffab00;font-weight:700;letter-spacing:.5px;margin-bottom:6px">🛠️ ADMIN</div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+          <button onclick="fecharMenuMais();activateCourtesyAdmin()" class="menu-mais-btn" style="border-color:#ffab0040">Ativar Vitalício pra mim <span>›</span></button>
+          <button onclick="fecharMenuMais();generateCourtesyLink()" class="menu-mais-btn" style="border-color:#ffab0040">Gerar link de cortesia <span>›</span></button>
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:9px;color:var(--text3);padding:8px;margin-top:8px;border-top:1px solid var(--border)">CoachOrg v3.0 Pro</div>
+    </div>
+  </div>
+
   <!-- Modal: Registrar comida (calorias IA) -->
   <div id="modalRegistrarComida" class="modal" style="display:none">
     <div class="modal-content" style="max-width:480px;max-height:90vh;overflow-y:auto">
@@ -1225,16 +1306,17 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
 <!-- PAGE: SETTINGS / COACH IA -->
 <div class="page" id="pageSettings">
 
-  <!-- COACH IA HEADER -->
-  <div style="background:linear-gradient(135deg,var(--accent2),#2a0a1e);border-radius:20px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden">
-    <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,82,82,.1);border-radius:50%"></div>
-    <div style="font-size:11px;color:#ff525280;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">✦ Inteligência Artificial</div>
-    <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Coach IA</div>
-    <div style="font-size:13px;color:#ffffff80">Análise automática do seu negócio</div>
+  <!-- HEADER: Configurações -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div>
+      <div style="font-size:20px;font-weight:900;letter-spacing:-.3px">⚙️ Configurações</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">Notificações, conta, dados e mais</div>
+    </div>
+    <button onclick="showPage('home')" style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--text2);padding:8px 12px;font-size:11px;cursor:pointer;font-weight:700">‹ Início</button>
   </div>
 
-  <!-- META FINANCEIRA -->
-  <div class="section-title">Meta Financeira do Mês</div>
+  <!-- META FINANCEIRA (continua aqui, dá pra editar) -->
+  <div class="section-title">🎯 Meta Financeira do Mês</div>
   <div class="card" id="financialGoalCard">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <div style="flex:1">
@@ -1245,12 +1327,12 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       </div>
     </div>
     <div id="goalProgressSection"></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px;font-style:italic">💡 Os insights agora aparecem direto na <strong>Home</strong> ✨</div>
   </div>
 
-  <!-- INSIGHTS IA -->
-  <div class="section-title">Insights do Coach IA</div>
-  <div id="aiInsightsContainer">
-    <div class="empty-state"><p>Carregando análise...</p></div>
+  <!-- INSIGHTS IA (mantidos pra back-compat, mas em destaque pra Home) -->
+  <div style="display:none">
+    <div id="aiInsightsContainer"></div>
   </div>
 
   <!-- 🎁 INDIQUE & GANHE (importante, fica visível) -->
@@ -1683,10 +1765,6 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
   <button class="tab-btn" onclick="showPage('payments')" data-page="payments">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
     Pagamentos
-  </button>
-  <button class="tab-btn" onclick="showPage('settings')" data-page="settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="0" fill="currentColor" opacity=".1"/><path d="M9.5 9a2.5 2.5 0 015 0v.5"/><path d="M7 13.5c0-1.5 1-2.5 2.5-2.5h5c1.5 0 2.5 1 2.5 2.5"/><circle cx="9.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><path d="M12 17v2M8 19l1-2M16 19l-1-2"/><path d="M5 9c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke-width="1.5" stroke-linecap="round"/><path d="M12 4c-1.5 0-2.8.55-3.8 1.45"/></svg>
-    Coach IA
   </button>
 </div>
 
@@ -2291,6 +2369,157 @@ function toggleTasksDone() {
   const btn = document.getElementById('tasksToggleBtn');
   if(btn) btn.textContent = showTasksDone ? 'ocultar feitas' : 'mostrar feitas';
   renderTasks();
+}
+
+// ======= HOME: Saudação, Coach IA, Meta, Menu Mais =======
+function renderHomeSaudacao(treinosHoje) {
+  const el = document.getElementById('homeSaudacao');
+  const linha = document.getElementById('homeResumoLinha');
+  if(!el) return;
+  const hour = new Date().getHours();
+  let prefix = 'Bom dia';
+  if(hour >= 12 && hour < 18) prefix = 'Boa tarde';
+  else if(hour >= 18 || hour < 5) prefix = 'Boa noite';
+  const nome = (currentUser?.email || '').split('@')[0].split('.')[0];
+  const nomeCap = nome ? nome.charAt(0).toUpperCase() + nome.slice(1) : '';
+  el.innerHTML = `${prefix}${nomeCap ? ', ' + nomeCap : ''} 👋`;
+  if(linha) {
+    if(treinosHoje > 0) {
+      linha.textContent = `Hoje você tem ${treinosHoje} treino${treinosHoje>1?'s':''}`;
+    } else {
+      linha.textContent = 'Sem treinos hoje — bom descanso 🌿';
+    }
+  }
+}
+
+function renderHomeCoachIA() {
+  const el = document.getElementById('homeCoachIA');
+  if(!el) return;
+  const insights = (typeof generateInsights === 'function') ? generateInsights() : [];
+  // Limita a 3 cards na Home (mais discreto)
+  const top3 = insights.slice(0, 3);
+  if(top3.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = `<div style="background:linear-gradient(135deg,#1a1a2e,#22112a);border:1.5px solid #ff525240;border-radius:16px;padding:14px;margin:14px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">✦</span>
+        <span style="font-size:12px;font-weight:800;color:#ff5252;letter-spacing:.5px">COACH IA</span>
+        <span style="background:#ff525215;border:1px solid #ff525240;color:#ff5252;font-size:9px;font-weight:800;padding:1px 6px;border-radius:20px">${insights.length} insight${insights.length>1?'s':''}</span>
+      </div>
+      ${insights.length > 3 ? `<button onclick="abrirTodosInsights()" style="background:none;border:none;color:#ff5252;font-size:11px;font-weight:700;cursor:pointer">Ver todos ›</button>` : ''}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${top3.map(ins => `<div style="background:var(--bg);border-left:3px solid ${ins.color || '#ff5252'};border-radius:8px;padding:9px 11px;display:flex;gap:9px;align-items:flex-start">
+        <div style="font-size:18px;line-height:1;flex-shrink:0">${ins.icon || '💡'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:1px">${ins.title}</div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.4">${ins.desc}</div>
+          ${ins.action ? `<button onclick="${ins.action}" style="margin-top:5px;background:${ins.color}20;color:${ins.color};border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">${ins.actionLabel}</button>` : ''}
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function abrirTodosInsights() {
+  // Mostra modal com todos os insights
+  const insights = (typeof generateInsights === 'function') ? generateInsights() : [];
+  const html = `<div style="display:flex;flex-direction:column;gap:8px">
+    ${insights.map(ins => `<div style="background:var(--bg);border-left:3px solid ${ins.color || '#ff5252'};border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+      <div style="font-size:20px;line-height:1;flex-shrink:0">${ins.icon || '💡'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">${ins.title}</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.4">${ins.desc}</div>
+        ${ins.action ? `<button onclick="${ins.action};fecharModalGenerico()" style="margin-top:6px;background:${ins.color}20;color:${ins.color};border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">${ins.actionLabel}</button>` : ''}
+      </div>
+    </div>`).join('')}
+  </div>`;
+  abrirModalGenerico('✦ Coach IA — Todos os insights', html);
+}
+
+function renderHomeMeta() {
+  const el = document.getElementById('homeMetaCard');
+  if(!el) return;
+  const goal = parseFloat(localStorage.getItem('coachorg_monthly_goal') || '0');
+  if(!goal) {
+    // Sem meta → CTA pra configurar
+    el.innerHTML = `<div onclick="abrirEditarMeta()" style="background:linear-gradient(135deg,#1a1a2e,#0f2a40);border:1.5px dashed #5b8cff60;border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">🎯</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:#5b8cff">Define a meta do mês</div>
+        <div style="font-size:10px;color:var(--text2)">Quanto você quer faturar este mês?</div>
+      </div>
+      <span style="color:#5b8cff;font-size:14px">›</span>
+    </div>`;
+    return;
+  }
+  const revenue = students.filter(s=>isPaymentDone(s.id)).reduce((sum,s)=>sum+(parseFloat(s.value)||0),0);
+  const pct = Math.min(100, Math.round((revenue / goal) * 100));
+  const cor = pct >= 100 ? '#4ade80' : pct >= 75 ? '#5b8cff' : pct >= 40 ? '#ffab00' : '#ff5252';
+  el.innerHTML = `<div onclick="abrirEditarMeta()" style="background:linear-gradient(135deg,#1a1a2e,#0f2a40);border:1.5px solid ${cor}40;border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🎯</span>
+        <span style="font-size:12px;font-weight:800;color:var(--text)">META DO MÊS</span>
+      </div>
+      <div style="font-size:13px;font-weight:900;color:${cor}">${pct}%</div>
+    </div>
+    <div style="height:8px;background:#ffffff10;border-radius:4px;overflow:hidden;margin-bottom:6px">
+      <div style="height:100%;background:${cor};width:${pct}%;transition:.3s"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2)">
+      <span>R$ ${revenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}</span>
+      <span>R$ ${goal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}</span>
+    </div>
+  </div>`;
+}
+
+function abrirEditarMeta() {
+  const cur = parseFloat(localStorage.getItem('coachorg_monthly_goal') || '0');
+  const v = prompt('Sua meta de faturamento mensal (R$):', cur || '');
+  if(v === null) return;
+  const n = parseFloat(v);
+  if(isNaN(n) || n < 0) { showToast('Valor inválido'); return; }
+  localStorage.setItem('coachorg_monthly_goal', String(n));
+  renderHomeMeta();
+}
+
+// ======= MENU "MAIS" =======
+function abrirMenuMais() {
+  document.getElementById('modalMenuMais').style.display = 'flex';
+  if(currentUser?.email === _ADMIN) {
+    const adm = document.getElementById('menuMaisAdmin');
+    if(adm) adm.style.display = '';
+  }
+}
+function fecharMenuMais() {
+  document.getElementById('modalMenuMais').style.display = 'none';
+}
+
+// ======= MODAL GENÉRICO (utilitário) =======
+function abrirModalGenerico(title, html) {
+  let m = document.getElementById('modalGenerico');
+  if(!m) {
+    m = document.createElement('div');
+    m.id = 'modalGenerico';
+    m.className = 'modal';
+    document.body.appendChild(m);
+  }
+  m.innerHTML = `<div class="modal-content" style="max-width:520px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;position:sticky;top:0;background:var(--card);padding-top:4px">
+      <div style="font-size:15px;font-weight:800">${title}</div>
+      <button onclick="fecharModalGenerico()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer">×</button>
+    </div>
+    ${html}
+  </div>`;
+  m.style.display = 'flex';
+}
+function fecharModalGenerico() {
+  const m = document.getElementById('modalGenerico');
+  if(m) m.style.display = 'none';
 }
 
 function renderTasks() {
@@ -4180,8 +4409,16 @@ function renderHome() {
   const getTodayTime = s => s.times?.[String(dow)] || s.time || '06:00';
   todayStudents.sort((a,b)=>getTodayTime(a).localeCompare(getTodayTime(b)));
 
+  // Saudação personalizada
+  renderHomeSaudacao(todayStudents.length);
+
   document.getElementById('totalStudents').textContent = students.length;
   document.getElementById('todayCount').textContent = todayStudents.length;
+
+  // Coach IA Insights + Meta na Home
+  renderHomeCoachIA();
+  renderHomeMeta();
+
   renderTasks();
   scheduleMyReminderNotifications();
   renderBirthdayBanner();
