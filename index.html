@@ -2388,6 +2388,8 @@ function renderPersonalSelfCare() {
       ${s.workout ? '✅ TREINEI HOJE' : '🏋️ Marcar meu treino do dia'}
     </button>
 
+    <div id="stravaSection"></div>
+
     <div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
         <span style="font-size:16px">🎓</span>
@@ -2410,6 +2412,164 @@ function renderPersonalSelfCare() {
     </div>
   </div>`;
   renderMyReminders();
+  renderStravaSection();
+}
+
+const STRAVA_CLIENT_ID = '';
+const STRAVA_REDIRECT = location.origin + location.pathname;
+
+function connectStrava() {
+  if(!STRAVA_CLIENT_ID) {
+    showToast('Strava ainda sendo configurado pela equipe');
+    return;
+  }
+  if(!currentUser) { showToast('Faça login primeiro'); return; }
+  const params = new URLSearchParams({
+    client_id: STRAVA_CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: STRAVA_REDIRECT,
+    approval_prompt: 'auto',
+    scope: 'read,activity:read',
+    state: 'strava_oauth'
+  });
+  window.location.href = 'https://www.strava.com/oauth/authorize?' + params.toString();
+}
+
+async function handleStravaCallback() {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  if(!code || state !== 'strava_oauth') return;
+  if(!currentUser) { showToast('Faça login antes de conectar Strava'); return; }
+  const sb = getSB();
+  if(!sb) return;
+  showToast('Conectando Strava...');
+  try {
+    const { data, error } = await sb.functions.invoke('strava-auth', {
+      body: { code, user_email: currentUser.email }
+    });
+    if(error || data?.error) {
+      showToast('Erro conectar Strava: ' + (data?.error || error.message));
+    } else {
+      localStorage.setItem('coachorg_strava_connected', '1');
+      showToast('⌚ Strava conectado!');
+    }
+  } catch(e) { showToast('Erro: ' + e.message); }
+  history.replaceState({}, '', location.pathname);
+  if(typeof renderHome === 'function') renderHome();
+}
+
+async function fetchStravaActivities() {
+  if(!currentUser) return null;
+  const sb = getSB();
+  if(!sb) return null;
+  const cached = localStorage.getItem('coachorg_strava_cache');
+  if(cached) {
+    try {
+      const c = JSON.parse(cached);
+      if(c.fetchedAt && Date.now() - c.fetchedAt < 30 * 60 * 1000) return c.data;
+    } catch(e) {}
+  }
+  try {
+    const { data, error } = await sb.functions.invoke('strava-activities', {
+      body: { user_email: currentUser.email, days: 7 }
+    });
+    if(!error && data && !data.error) {
+      localStorage.setItem('coachorg_strava_cache', JSON.stringify({ fetchedAt: Date.now(), data }));
+      return data;
+    }
+    if(data?.error === 'not_connected') return null;
+  } catch(e) { console.warn('Strava fetch error', e); }
+  return null;
+}
+
+const STRAVA_ICONS = { Run:'🏃', Ride:'🚴', Swim:'🏊', Walk:'🚶', Workout:'💪', WeightTraining:'🏋️', Yoga:'🧘', Hike:'🥾', Elliptical:'⚙️', Soccer:'⚽' };
+
+async function renderStravaSection() {
+  const el = document.getElementById('stravaSection');
+  if(!el) return;
+
+  const connected = localStorage.getItem('coachorg_strava_connected') === '1';
+  if(!connected) {
+    el.innerHTML = `<div style="background:var(--bg);border:1.5px solid #fc4c0240;border-radius:12px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:22px">⌚</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700">Conecte seu relógio</div>
+          <div style="font-size:10px;color:var(--text2)">Garmin · Polar · Apple Watch · Fitbit · Suunto via Strava</div>
+        </div>
+      </div>
+      <button onclick="connectStrava()" style="width:100%;background:#fc4c02;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;font-size:12px">CONECTAR STRAVA</button>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div id="stravaContent" style="background:var(--bg);border:1.5px solid #fc4c0240;border-radius:12px;padding:12px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="font-size:18px">⌚</span>
+      <span style="font-size:12px;font-weight:700">Strava · Últimos 7 dias</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:auto">Carregando...</span>
+    </div>
+  </div>`;
+
+  const data = await fetchStravaActivities();
+  const card = document.getElementById('stravaContent');
+  if(!card) return;
+  if(!data || !data.summary) {
+    card.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="font-size:18px">⌚</span>
+      <span style="font-size:12px;font-weight:700">Strava</span>
+      <button onclick="disconnectStrava()" style="margin-left:auto;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">Desconectar</button>
+    </div>
+    <div style="font-size:11px;color:var(--text2);text-align:center;padding:8px">Sem atividades nos últimos 7 dias</div>`;
+    return;
+  }
+
+  const sum = data.summary;
+  const acts = (data.activities || []).slice(0, 5);
+  card.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    ${sum.athlete_avatar ? `<img src="${sum.athlete_avatar}" style="width:24px;height:24px;border-radius:50%">` : '<span style="font-size:18px">⌚</span>'}
+    <span style="font-size:12px;font-weight:700">${sum.athlete_name || 'Strava'}</span>
+    <button onclick="refreshStrava()" style="margin-left:auto;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">↻</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">
+    <div style="background:var(--card);border-radius:8px;padding:8px;text-align:center">
+      <div style="font-size:18px;font-weight:800;color:#fc4c02">${sum.total_sessions}</div>
+      <div style="font-size:9px;color:var(--text2);letter-spacing:.3px">SESSÕES</div>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:8px;text-align:center">
+      <div style="font-size:18px;font-weight:800;color:#fc4c02">${(sum.total_calories || 0).toLocaleString('pt-BR')}</div>
+      <div style="font-size:9px;color:var(--text2);letter-spacing:.3px">CALORIAS</div>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:8px;text-align:center">
+      <div style="font-size:18px;font-weight:800;color:#fc4c02">${Math.floor(sum.total_minutes/60)}h${(sum.total_minutes%60).toString().padStart(2,'0')}</div>
+      <div style="font-size:9px;color:var(--text2);letter-spacing:.3px">TEMPO</div>
+    </div>
+  </div>
+  ${acts.length ? acts.map(a => {
+    const dt = new Date(a.start_date);
+    const dtStr = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    return `<div style="display:flex;align-items:center;gap:8px;background:var(--card);border-radius:8px;padding:7px 10px;margin-bottom:4px">
+      <span style="font-size:18px">${STRAVA_ICONS[a.type] || STRAVA_ICONS[a.sport_type] || '💪'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</div>
+        <div style="font-size:10px;color:var(--text2)">${dtStr} · ${a.moving_time_min}min${a.distance_km ? ' · '+a.distance_km+'km' : ''}</div>
+      </div>
+      ${a.calories ? `<div style="font-size:11px;font-weight:800;color:#fc4c02;flex-shrink:0">${a.calories}cal</div>` : ''}
+    </div>`;
+  }).join('') : '<div style="font-size:11px;color:var(--text2);text-align:center;padding:8px">Nenhuma atividade ainda</div>'}`;
+}
+
+function refreshStrava() {
+  localStorage.removeItem('coachorg_strava_cache');
+  renderStravaSection();
+}
+
+function disconnectStrava() {
+  if(!confirm('Desconectar do Strava? Você pode reconectar depois.')) return;
+  localStorage.removeItem('coachorg_strava_connected');
+  localStorage.removeItem('coachorg_strava_cache');
+  renderStravaSection();
 }
 
 async function validateMyOwnWorkout() {
@@ -4890,6 +5050,7 @@ initOneSignal();
 checkCourtesyExpiration();
 checkCourtesyURL();
 checkPasswordResetURL();
+handleStravaCallback();
 checkNotifications();
 checkWhatsAppReminders();
 setInterval(()=>{ checkNotifications(); checkWhatsAppReminders(); }, 60000);

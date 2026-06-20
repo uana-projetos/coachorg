@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <text x="60" y="140" font-family="Arial, sans-serif" font-weight="800" font-size="38" fill="#5b8cff">FEATURE #1</text>
+
+  <text x="60" y="270" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="72" fill="#fff">Coach IA</text>
+
+  <text x="60" y="370" font-family="Arial, sans-serif" font-weight="600" font-size="44" fill="#aaa">Detecta aluno em risco</text>
+  <text x="60" y="430" font-family="Arial, sans-serif" font-weight="600" font-size="44" fill="#aaa">de cancelar.</text>
+
+  <text x="60" y="540" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="48" fill="#5b8cff">ANTES da pessoa falar.</text>
+
+  <line x1="60" y1="600" x2="540" y2="600" stroke="#5b8cff" stroke-width="3"/>
+
+  <g transform="translate(60, 700)">
+    <rect width="960" height="280" rx="20" fill="#5b8cff15" stroke="#5b8cff40" stroke-width="2"/>
+    <text x="40" y="80" font-family="Arial, sans-serif" font-weight="800" font-size="32" fill="#fff">🧠 Analisa:</text>
+    <text x="80" y="140" font-family="Arial, sans-serif" font-weight="500" font-size="28" fill="#aaa">↓ Frequência de presença</text>
+    <text x="80" y="190" font-family="Arial, sans-serif" font-weight="500" font-size="28" fill="#aaa">↓ Padrão de pagamento</text>
+    <text x="80" y="240" font-family="Arial, sans-serif" font-weight="500" font-size="28" fill="#aaa">↓ Tempo desde última mensagem</text>
+  </g>
+</svg>

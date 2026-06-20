@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <text x="60" y="140" font-family="Arial, sans-serif" font-weight="800" font-size="38" fill="#ff5252">O PROBLEMA</text>
+
+  <text x="60" y="240" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="70" fill="#fff">Esqueci de cobrar</text>
+  <text x="60" y="320" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="70" fill="#fff">6 alunos.</text>
+
+  <line x1="60" y1="380" x2="540" y2="380" stroke="#ff5252" stroke-width="3"/>
+
+  <g transform="translate(60, 460)">
+    <rect width="960" height="80" rx="12" fill="#ffffff08" stroke="#ff525240" stroke-width="1.5"/>
+    <text x="40" y="52" font-family="Arial, sans-serif" font-weight="600" font-size="32" fill="#fff">📒 Caderno bagunçado</text>
+  </g>
+
+  <g transform="translate(60, 580)">
+    <rect width="960" height="80" rx="12" fill="#ffffff08" stroke="#ff525240" stroke-width="1.5"/>
+    <text x="40" y="52" font-family="Arial, sans-serif" font-weight="600" font-size="32" fill="#fff">📊 Planilha desatualizada</text>
+  </g>
+
+  <g transform="translate(60, 700)">
+    <rect width="960" height="80" rx="12" fill="#ffffff08" stroke="#ff525240" stroke-width="1.5"/>
+    <text x="40" y="52" font-family="Arial, sans-serif" font-weight="600" font-size="32" fill="#fff">💬 WhatsApp perdido entre 200 chats</text>
+  </g>
+
+  <text x="60" y="900" font-family="Arial, sans-serif" font-weight="700" font-size="36" fill="#fff">Resultado:</text>
+  <text x="60" y="960" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#ff5252">2 cancelaram. 4 não pagaram.</text>
+</svg>

@@ -1,11 +1,1 @@
-{
-  "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "personal-app",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "C:/Users/uanal/Downloads/personal-app", "-p", "3000", "-c-1"],
-      "port": 3000
-    }
-  ]
-}
+﻿{"version":"0.0.1","configurations":[{"name":"coachorg","runtimeExecutable":"npx","runtimeArgs":["serve","-p","3000","."],"port":3000}]}

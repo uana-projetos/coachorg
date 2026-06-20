@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff5252"/>
+      <stop offset="100%" stop-color="#ff1744"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <text x="60" y="140" font-family="Arial, sans-serif" font-weight="800" font-size="38" fill="#4ade80">A SOLUÇÃO</text>
+
+  <text x="60" y="260" font-family="Arial, sans-serif" font-weight="700" font-size="46" fill="#aaa">Cansei. Sentei.</text>
+  <text x="60" y="320" font-family="Arial, sans-serif" font-weight="700" font-size="46" fill="#aaa">E fiz meu próprio app.</text>
+
+  <line x1="60" y1="380" x2="540" y2="380" stroke="#4ade80" stroke-width="3"/>
+
+  <g transform="translate(280, 460)">
+    <rect width="520" height="520" rx="100" fill="#1a1a2e" stroke="#ff525230" stroke-width="3"/>
+    <rect x="100" y="130" width="320" height="60" rx="16" fill="url(#accent)"/>
+    <circle cx="135" cy="160" r="20" fill="#1a1a2e"/>
+    <path d="M122 160 L132 170 L150 148" stroke="url(#accent)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="100" y="220" width="320" height="60" rx="16" fill="url(#accent)" opacity="0.7"/>
+    <rect x="100" y="310" width="320" height="60" rx="16" fill="url(#accent)" opacity="0.4"/>
+    <rect x="100" y="400" width="320" height="60" rx="16" fill="url(#accent)" opacity="0.2"/>
+  </g>
+</svg>
