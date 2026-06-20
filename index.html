@@ -943,6 +943,69 @@ body {
     <div style="font-size:11px;color:var(--text2);margin-top:2px">Quem cuida de quem cuida</div>
   </div>
 
+  <!-- 🛠️ FERRAMENTAS DE TREINO -->
+  <div class="section-title" style="margin-bottom:10px">🛠️ Ferramentas PhD</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px">
+    <button onclick="abrirFerramenta('1rm')" class="tool-btn" style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 10px;text-align:left;cursor:pointer;color:var(--text)">
+      <div style="font-size:22px">🧮</div>
+      <div style="font-size:12px;font-weight:800;margin-top:4px">1RM</div>
+      <div style="font-size:9px;color:var(--text2)">Calcular força máxima</div>
+    </button>
+    <button onclick="abrirFerramenta('postura')" class="tool-btn" style="background:linear-gradient(135deg,#5b8cff15,#9c5bff15);border:1.5px solid #9c5bff60;border-radius:12px;padding:14px 10px;text-align:left;cursor:pointer;color:var(--text);position:relative">
+      <div style="position:absolute;top:6px;right:6px;background:#9c5bff;color:#fff;font-size:8px;font-weight:800;padding:1px 5px;border-radius:8px">IA</div>
+      <div style="font-size:22px">📸</div>
+      <div style="font-size:12px;font-weight:800;margin-top:4px">Análise Postural</div>
+      <div style="font-size:9px;color:var(--text2)">Foto → PhD analisa</div>
+    </button>
+    <button onclick="abrirFerramenta('phd-treino')" class="tool-btn" style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 10px;text-align:left;cursor:pointer;color:var(--text)">
+      <div style="font-size:22px">🎓</div>
+      <div style="font-size:12px;font-weight:800;margin-top:4px">Validar Treino</div>
+      <div style="font-size:9px;color:var(--text2)">PhD revisa o plano</div>
+    </button>
+    <button onclick="abrirFerramenta('periodizacao')" class="tool-btn" style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 10px;text-align:left;cursor:pointer;color:var(--text);position:relative">
+      <div style="position:absolute;top:6px;right:6px;background:#4ade80;color:#0f0f1a;font-size:8px;font-weight:800;padding:1px 5px;border-radius:8px">EM BREVE</div>
+      <div style="font-size:22px;opacity:.6">📅</div>
+      <div style="font-size:12px;font-weight:800;margin-top:4px;opacity:.7">Periodização</div>
+      <div style="font-size:9px;color:var(--text2)">Semana ou mês</div>
+    </button>
+  </div>
+
+  <!-- Modal: Análise Postural por foto -->
+  <div id="modalPostura" class="modal" style="display:none">
+    <div class="modal-content" style="max-width:520px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:22px">📸</span>
+          <span style="font-size:15px;font-weight:800">Análise Postural PhD</span>
+        </div>
+        <button onclick="fecharModalPostura()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer">×</button>
+      </div>
+
+      <!-- Seletor: pra quem? -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;color:var(--text2);font-weight:700">Pra quem?</label>
+        <select id="posturaAlvo" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:13px;margin-top:4px">
+          <option value="eu">💚 Eu mesmo</option>
+        </select>
+      </div>
+
+      <!-- Upload de fotos -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;color:var(--text2);font-weight:700">Fotos (frente / lado / costas — até 3)</label>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Use roupa justa, ambiente iluminado, posição neutra</div>
+        <input type="file" id="posturaFotos" accept="image/*" multiple capture="environment" style="display:none" onchange="onPosturaFotosSelected(event)">
+        <button onclick="document.getElementById('posturaFotos').click()" style="width:100%;background:var(--bg);border:1.5px dashed #9c5bff60;border-radius:10px;padding:14px;color:#9c5bff;font-weight:700;font-size:13px;cursor:pointer">
+          📷 Selecionar fotos
+        </button>
+        <div id="posturaPreview" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <button onclick="analisarPostura()" id="btnAnalisarPostura" style="width:100%;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-size:14px">🎓 Analisar com Personal PhD</button>
+
+      <div id="posturaResult" style="margin-top:14px"></div>
+    </div>
+  </div>
+
   <div id="euSelfCare"></div>
 
   <!-- MEU TREINO: seletor de modo -->
@@ -2797,6 +2860,179 @@ function confirmarEAnalisarTreino() {
   document.getElementById('meuTreinoModoAnalisar').style.display = '';
   document.getElementById('meuTreinoResult').innerHTML = '';
   validarMeuTreino();
+}
+
+// ====== FERRAMENTAS PhD (aba EU) ======
+function abrirFerramenta(tipo) {
+  if(tipo === '1rm') {
+    document.getElementById('euSelfCare').scrollIntoView({behavior:'smooth',block:'start'});
+    setTimeout(()=>showToast('Role pra baixo até calculadora 1RM'), 300);
+    return;
+  }
+  if(tipo === 'phd-treino') {
+    escolherModoTreino('analisar');
+    document.getElementById('myTreinoInput')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  if(tipo === 'postura') {
+    abrirModalPostura();
+    return;
+  }
+  if(tipo === 'periodizacao') {
+    showToast('🛠️ Em construção — em breve');
+    return;
+  }
+}
+
+function abrirModalPostura() {
+  // Popular seletor com EU + lista de alunos
+  const sel = document.getElementById('posturaAlvo');
+  if(sel) {
+    sel.innerHTML = '<option value="eu">💚 Eu mesmo</option>' +
+      (window.students || []).map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  }
+  // Limpar estado anterior
+  _posturaImagens = [];
+  document.getElementById('posturaPreview').innerHTML = '';
+  document.getElementById('posturaResult').innerHTML = '';
+  document.getElementById('modalPostura').style.display = 'flex';
+}
+
+function fecharModalPostura() {
+  document.getElementById('modalPostura').style.display = 'none';
+}
+
+let _posturaImagens = []; // array de {dataUrl, label}
+
+async function onPosturaFotosSelected(event) {
+  const files = Array.from(event.target.files || []).slice(0, 3);
+  if(!files.length) return;
+  _posturaImagens = [];
+  for(const file of files) {
+    const dataUrl = await readFileAsDataURL(file);
+    const compressed = await comprimirImagem(dataUrl, 1024);
+    _posturaImagens.push({ dataUrl: compressed, name: file.name });
+  }
+  renderPosturaPreview();
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function comprimirImagem(dataUrl, maxWidth) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.width);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = dataUrl;
+  });
+}
+
+function renderPosturaPreview() {
+  const el = document.getElementById('posturaPreview');
+  if(!el) return;
+  const labels = ['Frente','Lado','Costas'];
+  el.innerHTML = _posturaImagens.map((img,i) => `
+    <div style="position:relative;width:80px">
+      <img src="${img.dataUrl}" style="width:80px;height:100px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border)">
+      <div style="font-size:10px;text-align:center;color:var(--text2);margin-top:3px">${labels[i] || 'Foto '+(i+1)}</div>
+    </div>`).join('');
+}
+
+async function analisarPostura() {
+  if(_posturaImagens.length === 0) { showToast('Adicione pelo menos 1 foto'); return; }
+  const alvoId = document.getElementById('posturaAlvo').value;
+  const btn = document.getElementById('btnAnalisarPostura');
+  const result = document.getElementById('posturaResult');
+
+  btn.textContent = '🎓 Analisando fotos...';
+  btn.disabled = true;
+  result.innerHTML = '<div style="font-size:11px;color:var(--text2);padding:10px;text-align:center">PhD analisando ' + _posturaImagens.length + ' foto(s)... pode demorar 15-30s</div>';
+
+  let ctx = { name: 'Eu Personal', age: undefined, goal: 'avaliação postural', notes: '' };
+  if(alvoId !== 'eu') {
+    const s = (window.students || []).find(x => x.id === alvoId);
+    if(s) ctx = { name: s.name, age: s.age, goal: s.goal, notes: s.notes };
+  }
+  ctx.views = ['frente','lado','costas'].slice(0, _posturaImagens.length);
+
+  try {
+    const sb = getSB();
+    if(!sb) { result.innerHTML = '<div style="font-size:11px;color:var(--accent);padding:10px">Sem conexão Supabase</div>'; return; }
+    const { data, error } = await sb.functions.invoke('phd-vision', {
+      body: {
+        type: 'posture',
+        images: _posturaImagens.map(i => i.dataUrl),
+        context: ctx
+      }
+    });
+    if(error || data?.error) {
+      result.innerHTML = '<div style="font-size:11px;color:var(--accent);padding:10px">Erro: ' + (error?.message || data?.error || 'tente novamente') + '</div>';
+    } else {
+      renderPosturaResult(result, data, alvoId);
+    }
+  } catch(e) {
+    result.innerHTML = '<div style="font-size:11px;color:var(--accent);padding:10px">Erro: ' + e.message + '</div>';
+  }
+  btn.textContent = '🎓 Analisar com Personal PhD';
+  btn.disabled = false;
+}
+
+function renderPosturaResult(container, data, alvoId) {
+  const score = data.score_postural || '-';
+  const scoreColor = score >= 8 ? '#4ade80' : score >= 5 ? '#ffab00' : '#ff5252';
+  const achados = data.achados || [];
+  const correcoes = data.correcoes || [];
+  const alerta = data.alerta_medico || '';
+
+  container.innerHTML = `
+    <div style="background:var(--bg);border:1.5px solid #9c5bff40;border-radius:12px;padding:14px;margin-top:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:18px">🎓</span>
+          <span style="font-size:12px;font-weight:800;color:#9c5bff;letter-spacing:.5px">PERSONAL PhD · POSTURA</span>
+        </div>
+        <div style="background:${scoreColor}20;border:1.5px solid ${scoreColor};color:${scoreColor};font-size:14px;font-weight:900;padding:4px 10px;border-radius:20px">${score}/10</div>
+      </div>
+
+      ${data.resumo ? `<div style="font-size:12px;color:var(--text);margin-bottom:12px;padding:10px;background:var(--card);border-radius:8px;line-height:1.5">${data.resumo}</div>` : ''}
+
+      ${alerta ? `<div style="background:#ff525215;border:1.5px solid #ff5252;border-radius:10px;padding:10px;margin-bottom:10px;font-size:11px;color:#ff5252;font-weight:700">⚠️ ENCAMINHAR PRA MÉDICO: ${alerta}</div>` : ''}
+
+      ${achados.length ? `<div style="font-size:11px;font-weight:800;color:var(--text);margin-bottom:6px">🔍 ACHADOS</div>` : ''}
+      ${achados.map(a => {
+        const c = a.severidade === 'severo' ? '#ff5252' : a.severidade === 'moderado' ? '#ffab00' : '#5b8cff';
+        return `<div style="background:${c}10;border-left:3px solid ${c};border-radius:6px;padding:8px 10px;margin-bottom:6px">
+          <div style="font-size:11px;font-weight:800;color:${c};margin-bottom:2px">${a.regiao} · ${a.severidade}</div>
+          <div style="font-size:11px;color:var(--text);line-height:1.4">${a.achado}</div>
+          ${a.impacto ? `<div style="font-size:10px;color:var(--text2);margin-top:3px">↳ ${a.impacto}</div>` : ''}
+        </div>`;
+      }).join('')}
+
+      ${correcoes.length ? `<div style="font-size:11px;font-weight:800;color:var(--text);margin-top:12px;margin-bottom:6px">💪 CORREÇÕES</div>` : ''}
+      ${correcoes.map(c => `<div style="background:#4ade8010;border-left:3px solid #4ade80;border-radius:6px;padding:8px 10px;margin-bottom:6px">
+        <div style="font-size:11px;font-weight:800;color:#4ade80;margin-bottom:2px">${(c.tipo||'').toUpperCase()} · ${c.musculo_grupo||''}</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.4">${c.exercicio}</div>
+        ${c.fonte ? `<div style="font-size:9px;color:var(--text3);margin-top:3px;font-style:italic">${c.fonte}</div>` : ''}
+      </div>`).join('')}
+
+      <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px;font-style:italic">Personal PhD · análise visual baseada em Kendall, Sahrmann, Janda</div>
+    </div>`;
 }
 
 function aplicarTreinoSugerido(targetInputId, btn) {
