@@ -950,7 +950,7 @@ body {
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <span style="font-size:20px">🎓</span>
       <div style="flex:1">
-        <div style="font-size:13px;font-weight:700">Monte SEU treino com Dr. CoachOrg PhD</div>
+        <div style="font-size:13px;font-weight:700">Monte SEU treino com Personal PhD</div>
         <div style="font-size:10px;color:var(--text2)">IA com 30 anos de biomecânica + Schoenfeld + RP</div>
       </div>
     </div>
@@ -958,7 +958,7 @@ body {
     <textarea id="myTreinoInput" placeholder="Ex: peito e tríceps 45min hipertrofia&#10;OU&#10;Supino reto 4x8&#10;Crucifixo 3x10&#10;..." rows="4" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:13px;resize:vertical;font-family:inherit;margin-bottom:8px"></textarea>
     <div style="display:flex;gap:6px;margin-bottom:6px">
       <button onclick="gerarMeuTreino()" id="meuGerBtn" style="flex:1;background:linear-gradient(90deg,var(--accent),#ff6d6d);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">⚡ Gerar treino</button>
-      <button onclick="validarMeuTreino()" id="meuPhdBtn" style="flex:1;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">🎓 Validar PhD</button>
+      <button onclick="validarMeuTreino()" id="meuPhdBtn" style="flex:1;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">🎓 Personal PhD</button>
     </div>
     <div id="meuTreinoResult" style="margin-top:8px"></div>
     <div style="display:flex;gap:6px;margin-top:8px">
@@ -2713,7 +2713,7 @@ function gerarMeuTreino() {
     input.value = title + '\n' + cfg.duration + 'min · ' + cfg.level + ' · ' + cfg.goal + '\n\n' + lines;
     btn.textContent = '⚡ Gerar treino';
     btn.disabled = false;
-    showToast('✅ Treino gerado — clica em Validar PhD pra revisar');
+    showToast('✅ Treino gerado — clica em Personal PhD pra revisar');
   }, 500);
 }
 
@@ -2739,7 +2739,7 @@ async function validarMeuTreino() {
   } catch(e) {
     result.innerHTML = '<div style="font-size:11px;color:var(--accent);padding:8px">Erro: ' + e.message + '</div>';
   }
-  btn.textContent = '🎓 Validar PhD';
+  btn.textContent = '🎓 Personal PhD';
   btn.disabled = false;
 }
 
@@ -2897,7 +2897,7 @@ async function validateMyOwnWorkout() {
   } catch(e) {
     result.innerHTML = '<div style="font-size:11px;color:var(--accent);padding:8px">Erro de conexão.</div>';
   }
-  btn.textContent = '🎓 Validar com Dr. CoachOrg';
+  btn.textContent = '🎓 Validar com Personal PhD';
   btn.disabled = false;
 }
 
@@ -4217,7 +4217,7 @@ function showStudentDetail(id) {
         <div style="font-size:13px;font-weight:700;color:var(--text)">Gerar Treino com IA</div>
         <span style="background:#ff525220;color:var(--accent);border:1px solid #ff525240;border-radius:20px;font-size:9px;font-weight:800;padding:2px 7px;letter-spacing:.5px;text-transform:uppercase">Beta</span>
       </div>
-      <div style="font-size:10px;color:#5b8cff;margin-bottom:8px;font-weight:700">🎓 Validação PhD: ciência de Schoenfeld + RP embarcada</div>
+      <div style="font-size:10px;color:#5b8cff;margin-bottom:8px;font-weight:700">🎓 Personal PhD: ciência de Schoenfeld + RP embarcada</div>
       <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.4">Descreva o objetivo do treino. Ex: "peito e tríceps intermediário 45min, hipertrofia"</div>
       <textarea id="aiPromptInput_${s.id}" placeholder="Ex: treino de pernas iniciante, 4 exercícios, foco glúteo" rows="2"
         style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:13px;resize:vertical;font-family:inherit;margin-bottom:8px"></textarea>
@@ -4225,7 +4225,7 @@ function showStudentDetail(id) {
         <button onclick="generateAIWorkout('${s.id}')" id="aiGenBtn_${s.id}"
           style="flex:1;background:linear-gradient(90deg,var(--accent),#ff6d6d);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">⚡ Gerar treino</button>
         <button onclick="validatePhDWorkout('${s.id}')" id="phdValidateBtn_${s.id}"
-          style="flex:1;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">🎓 Validar PhD</button>
+          style="flex:1;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px">🎓 Personal PhD</button>
       </div>
       <div style="font-size:10px;color:var(--text2);margin-bottom:6px">🎓 Cole um treino já feito ou descreva, e a IA valida com ciência de hipertrofia</div>
       <div id="aiResult_${s.id}" style="margin-top:12px"></div>
@@ -4629,7 +4629,7 @@ async function validatePhDWorkout(studentId) {
       });
       if(!error && data && Array.isArray(data.insights) && data.insights.length > 0) {
         renderPhDInsights(result, data.insights, true);
-        btn.textContent = '🎓 Validar PhD';
+        btn.textContent = '🎓 Personal PhD';
         btn.disabled = false;
         return;
       }
@@ -4732,7 +4732,7 @@ async function validatePhDWorkout(studentId) {
     const summaryStr = `${exercises.length} exercícios · ${totalSets} séries · ~${avgReps} reps médias · Objetivo: ${cfg.goal}`;
     renderPhDInsights(result, insights, false, summaryStr);
 
-    btn.textContent = '🎓 Validar PhD';
+    btn.textContent = '🎓 Personal PhD';
     btn.disabled = false;
   }, 700);
 }
@@ -4741,13 +4741,13 @@ function renderPhDInsights(container, insights, isGemini, summary) {
   const color = (t) => ({ warn:'#ffab00', ok:'#4ade80', tip:'#5b8cff', science:'#9c5bff', lesao:'#ff5252' }[t] || '#5b8cff');
   const bg = (t) => ({ warn:'#ffab0015', ok:'#4ade8015', tip:'#5b8cff15', science:'#9c5bff15', lesao:'#ff525215' }[t] || '#5b8cff15');
   const badge = isGemini
-    ? '<span style="background:linear-gradient(90deg,#9c5bff,#5b8cff);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.5px">✨ Dr. CoachOrg AI</span>'
+    ? '<span style="background:linear-gradient(90deg,#9c5bff,#5b8cff);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.5px">✨ Personal PhD</span>'
     : '<span style="background:#5b8cff15;border:1px solid #5b8cff40;color:#5b8cff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px">Schoenfeld + RP</span>';
   container.innerHTML = `
     <div style="background:var(--bg);border:1.5px solid #5b8cff40;border-radius:12px;padding:14px;margin-top:6px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
         <span style="font-size:18px">🎓</span>
-        <span style="font-size:13px;font-weight:800;color:#5b8cff;letter-spacing:.5px">VALIDAÇÃO PhD</span>
+        <span style="font-size:13px;font-weight:800;color:#5b8cff;letter-spacing:.5px">PERSONAL PhD</span>
         ${badge}
       </div>
       ${summary ? `<div style="font-size:11px;color:var(--text2);margin-bottom:10px">${summary}</div>` : ''}
@@ -4755,7 +4755,7 @@ function renderPhDInsights(container, insights, isGemini, summary) {
         <div style="font-size:12px;font-weight:800;color:${color(ins.type)};margin-bottom:3px">${ins.icon||'💡'} ${ins.title}</div>
         <div style="font-size:11px;color:var(--text);line-height:1.4">${ins.desc}</div>
       </div>`).join('')}
-      <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px;font-style:italic">${isGemini ? 'Dr. CoachOrg — PhD 30 anos em biomecânica e fisiologia · Baseado em literatura científica peer-reviewed' : 'Baseado em Schoenfeld 2021 + RP Scientific Principles of Hypertrophy'}</div>
+      <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px;font-style:italic">${isGemini ? 'Personal PhD — 30 anos em biomecânica e fisiologia · Literatura científica peer-reviewed' : 'Baseado em Schoenfeld 2021 + RP Scientific Principles of Hypertrophy'}</div>
     </div>`;
 }
 
