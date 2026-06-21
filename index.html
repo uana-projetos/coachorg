@@ -929,6 +929,48 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
   <div class="splash-bar"></div>
 </div>
 
+<!-- LOGIN WALL -->
+<div id="loginWall" style="display:none;position:fixed;inset:0;background:#0a0a14;z-index:9998;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px 32px;overflow-y:auto">
+  <div style="width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center">
+    <!-- Logo -->
+    <svg width="72" height="72" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:16px">
+      <defs><linearGradient id="wsg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5252"/><stop offset="100%" stop-color="#ff1744"/></linearGradient></defs>
+      <rect fill="#1a1a2e" width="100" height="100" rx="22"/>
+      <rect x="22" y="24" width="56" height="12" rx="4" fill="url(#wsg)"/>
+      <circle cx="30" cy="30" r="3.6" fill="#1a1a2e"/>
+      <path d="M27.5 30 L29.5 32 L33 27.5" stroke="url(#wsg)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="22" y="40" width="56" height="12" rx="4" fill="url(#wsg)"/>
+      <rect x="22" y="56" width="56" height="12" rx="4" fill="url(#wsg)"/>
+      <rect x="22" y="72" width="56" height="12" rx="4" fill="url(#wsg)"/>
+    </svg>
+    <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.5px;margin-bottom:4px">Coach<span style="color:#ff5252">Org</span></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:36px;text-align:center">Organize seus alunos. Cresça como coach.</div>
+
+    <!-- Form -->
+    <div style="width:100%;margin-bottom:12px">
+      <input type="email" id="wallEmail" placeholder="Seu e-mail" autocomplete="email"
+        style="width:100%;background:#ffffff08;border:1.5px solid #ffffff18;border-radius:14px;color:#fff;padding:15px 16px;font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none">
+    </div>
+    <div style="width:100%;margin-bottom:8px">
+      <input type="password" id="wallPassword" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password"
+        style="width:100%;background:#ffffff08;border:1.5px solid #ffffff18;border-radius:14px;color:#fff;padding:15px 16px;font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none">
+    </div>
+    <div id="wallError" style="color:#ff5252;font-size:12px;margin-bottom:8px;display:none;width:100%;text-align:center;padding:8px;background:#ff52521a;border-radius:10px"></div>
+
+    <button onclick="handleWallLogin()" id="wallLoginBtn"
+      style="width:100%;background:linear-gradient(90deg,#ff5252,#ff1744);color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px;letter-spacing:.3px">
+      Entrar
+    </button>
+    <button onclick="handleWallSignup()" id="wallSignupBtn"
+      style="width:100%;background:transparent;border:1.5px solid #ffffff20;color:var(--text2);border-radius:14px;padding:15px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:20px">
+      Criar conta nova
+    </button>
+    <button onclick="handleForgotPassword()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">
+      Esqueci minha senha
+    </button>
+  </div>
+</div>
+
 <div id="betaBanner" style="display:none;background:linear-gradient(90deg,#9c5bff,#5b8cff);padding:8px 14px;display:flex;align-items:center;gap:10px;font-size:11px;color:#fff;font-weight:600;line-height:1.4">
   <span style="font-size:14px;flex-shrink:0">🚧</span>
   <div style="flex:1">App em <strong>BETA</strong> — pode aparecer bug. Manda print pra gente se travar 🙏</div>
@@ -2471,12 +2513,11 @@ async function signUpWithEmail(email, password) {
 }
 
 async function handleForgotPassword() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const errEl = document.getElementById('loginError');
+  const email = (document.getElementById('wallEmail')?.value || document.getElementById('loginEmail')?.value || '').trim();
+  const errEl = document.getElementById('wallError') || document.getElementById('loginError');
   if(!email) {
-    errEl.textContent = 'Digite seu email no campo acima primeiro';
-    errEl.style.display = 'block';
-    return;
+    if(errEl) { errEl.textContent = 'Digite seu email no campo acima primeiro'; errEl.style.display = 'block'; }
+    showToast('Digite seu email primeiro'); return;
   }
   const sb = getSB();
   if(!sb) { errEl.textContent = 'Erro de conexão'; errEl.style.display='block'; return; }
@@ -2522,6 +2563,8 @@ async function doSignOut() {
 }
 
 function updateAuthUI() {
+  const wall = document.getElementById('loginWall');
+  if(wall) wall.style.display = currentUser ? 'none' : 'flex';
   const el = document.getElementById('authStatus');
   if(!el) return;
   if(currentUser) {
@@ -2619,6 +2662,38 @@ async function handleSignup() {
       checkCourtesyURL();
     }, 1200);
   }
+}
+async function handleWallLogin() {
+  const email = document.getElementById('wallEmail').value.trim();
+  const pass = document.getElementById('wallPassword').value;
+  const errEl = document.getElementById('wallError');
+  const btn = document.getElementById('wallLoginBtn');
+  if(!email||!pass) { errEl.textContent='Preencha email e senha'; errEl.style.display='block'; return; }
+  btn.textContent='Entrando...'; btn.disabled=true;
+  const { error } = await signInWithEmail(email, pass);
+  btn.textContent='Entrar'; btn.disabled=false;
+  if(error) { errEl.textContent=error; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  const pending = localStorage.getItem('coachorg_pending_vip');
+  if(pending) {
+    localStorage.removeItem('coachorg_pending_vip');
+    setTimeout(() => { history.replaceState({}, '', location.pathname + '?vip=' + pending); checkCourtesyURL(); }, 800);
+  }
+}
+
+async function handleWallSignup() {
+  const email = document.getElementById('wallEmail').value.trim();
+  const pass = document.getElementById('wallPassword').value;
+  const errEl = document.getElementById('wallError');
+  const btn = document.getElementById('wallSignupBtn');
+  if(!email||!pass) { errEl.textContent='Preencha email e senha'; errEl.style.display='block'; return; }
+  if(pass.length<6) { errEl.textContent='Senha deve ter pelo menos 6 caracteres'; errEl.style.display='block'; return; }
+  btn.textContent='Criando conta...'; btn.disabled=true;
+  const { error } = await signUpWithEmail(email, pass);
+  btn.textContent='Criar conta nova'; btn.disabled=false;
+  if(error) { errEl.textContent=error; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  showToast('✅ Conta criada! Verifique seu email para confirmar.');
 }
 // ==================== END SUPABASE AUTH ====================
 let selectedWeekDay = new Date().getDay();
