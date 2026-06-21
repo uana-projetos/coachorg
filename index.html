@@ -2164,6 +2164,17 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
         <input type="number" id="fValue" step="0.01" placeholder="200.00">
       </div>
       <div class="form-group">
+        <label>Limite de reposições por mês <span style="font-size:11px;color:var(--text2);font-weight:400">(0 = sem limite)</span></label>
+        <select id="fReposicaoLimite" style="background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:12px 14px;border-radius:var(--r-md);font-size:13px;width:100%">
+          <option value="0">Sem limite</option>
+          <option value="1">1 por mês</option>
+          <option value="2" selected>2 por mês</option>
+          <option value="3">3 por mês</option>
+          <option value="4">4 por mês</option>
+          <option value="5">5 por mês</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>Observações</label>
         <textarea id="fNotes" placeholder="Lesões, restrições, preferências..."></textarea>
       </div>
@@ -4952,6 +4963,21 @@ function isPaymentDone(id) {
   return attendance['pay_'+month+'_'+id] || false;
 }
 
+function getReposicoes(id) {
+  const key = 'rep_' + new Date().toISOString().slice(0,7) + '_' + id;
+  return parseInt(attendance[key] || 0);
+}
+function addReposicao(id) {
+  const key = 'rep_' + new Date().toISOString().slice(0,7) + '_' + id;
+  attendance[key] = getReposicoes(id) + 1;
+  save(); openStudent(id);
+}
+function removeReposicao(id) {
+  const key = 'rep_' + new Date().toISOString().slice(0,7) + '_' + id;
+  const cur = getReposicoes(id);
+  if(cur > 0) { attendance[key] = cur - 1; save(); openStudent(id); }
+}
+
 function togglePayment(id) {
   const month = new Date().toISOString().slice(0,7);
   const key = 'pay_'+month+'_'+id;
@@ -6598,6 +6624,31 @@ function showStudentDetail(id) {
       </div>
     </div>
 
+    ${(()=>{
+      const rep = getReposicoes(s.id);
+      const lim = s.reposicaoLimite ?? 2;
+      if(lim === 0) return '';
+      const pct = Math.min(100, Math.round(rep/lim*100));
+      const col = rep >= lim ? '#ff5252' : rep >= lim-1 ? '#ffab00' : '#4ade80';
+      const atLim = rep >= lim;
+      return `<div class="card" style="border:1px solid ${col}30">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--text)">🔄 Reposições este mês</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">${rep} de ${lim} usada${rep!==1?'s':''} · ${atLim ? '<span style="color:#ff5252;font-weight:700">Limite atingido</span>' : (lim-rep)+' restante'+(lim-rep!==1?'s':'')}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button onclick="removeReposicao('${s.id}')" style="width:32px;height:32px;border-radius:50%;background:var(--card2);border:1.5px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1" ${rep===0?'disabled style="opacity:.3;cursor:not-allowed"':''}>−</button>
+            <div style="font-size:24px;font-weight:900;color:${col};min-width:28px;text-align:center">${rep}</div>
+            <button onclick="addReposicao('${s.id}')" style="width:32px;height:32px;border-radius:50%;background:${atLim?'#ffffff10':'var(--accent)'};border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1" ${atLim?'disabled style="opacity:.4;cursor:not-allowed"':''}>+</button>
+          </div>
+        </div>
+        <div style="height:4px;background:#ffffff10;border-radius:2px">
+          <div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:.4s"></div>
+        </div>
+      </div>`;
+    })()}
+
     <div class="card">
       <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dias de Treino</div>
       <div class="student-days" style="gap:6px">
@@ -6759,6 +6810,7 @@ function editStudent(id) {
   document.getElementById('fPayDay').value = s.payDay || '';
   document.getElementById('fValue').value = s.value || '';
   document.getElementById('fNotes').value = s.notes || '';
+  document.getElementById('fReposicaoLimite').value = String(s.reposicaoLimite ?? 2);
   document.getElementById('btnDelete').style.display = 'block';
   document.querySelectorAll('.day-pick').forEach(d=>{
     d.classList.toggle('selected', s.days && s.days.includes(parseInt(d.dataset.day)));
@@ -6853,6 +6905,7 @@ function saveStudent(e) {
     payDay: document.getElementById('fPayDay').value,
     value: document.getElementById('fValue').value,
     notes: document.getElementById('fNotes').value.trim(),
+    reposicaoLimite: parseInt(document.getElementById('fReposicaoLimite').value) || 0,
   };
 
   if(id) {
