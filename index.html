@@ -1113,6 +1113,66 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     </div>
   </div>
 
+  <!-- Modal: Anamnese -->
+  <div id="modalAnamnese" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal" style="max-width:460px">
+      <div class="modal-header">
+        <div class="modal-title">🩺 Anamnese — <span id="anamneseNomeLabel" style="font-weight:600"></span></div>
+        <button class="modal-close" onclick="document.getElementById('modalAnamnese').classList.remove('show')">×</button>
+      </div>
+      <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:72vh">
+        <input type="hidden" id="anamneseStudentId">
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:5px">Queixa principal / dores atuais</label>
+          <textarea id="anamneseQueixa" rows="2" placeholder="Ex: dor na lombar ao agachar, joelho estalando, ombro limitado"
+            style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:9px 11px;font-size:13px;resize:vertical;font-family:inherit"></textarea>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:7px">Regiões com dor ou limitação <span style="font-size:10px;font-weight:400;color:var(--text3)">(toca pra marcar)</span></label>
+          <div id="anamneseDoresChips" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:7px">Condições médicas <span style="font-size:10px;font-weight:400;color:var(--text3)">(toca pra marcar)</span></label>
+          <div id="anamneseCondicoesChips" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:5px">Lesões anteriores / cirurgias</label>
+          <textarea id="anamneseLesoes" rows="2" placeholder="Ex: LCA direito operado 2022, hérnia L4-L5 desde 2019"
+            style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:9px 11px;font-size:12px;resize:vertical;font-family:inherit"></textarea>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:5px">Medicamentos em uso</label>
+          <input id="anamneseMedicamentos" type="text" placeholder="Ex: Losartana, Metformina, Beta-bloqueador"
+            style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:9px 11px;font-size:13px">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:5px">Laudo / prescrição médica <span style="font-size:10px;font-weight:400;color:var(--text3)">(cola o texto aqui)</span></label>
+          <textarea id="anamneseLaudo" rows="4" placeholder="Cole ou escreva o laudo médico. A IA vai extrair contraindicações e adaptar treinos automaticamente."
+            style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:9px 11px;font-size:12px;resize:vertical;font-family:inherit;line-height:1.5"></textarea>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:7px">Liberação médica para exercício</label>
+          <div style="display:flex;gap:6px">
+            <button id="libSim" onclick="setLiberacao('sim')" style="flex:1;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s">✅ Liberado</button>
+            <button id="libParcial" onclick="setLiberacao('parcial')" style="flex:1;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s">⚠️ Parcial</button>
+            <button id="libNao" onclick="setLiberacao('nao')" style="flex:1;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s">❌ Não liberado</button>
+          </div>
+        </div>
+        <div id="anamneseIAResult" style="display:none"></div>
+        <div style="display:flex;gap:8px;padding-top:4px">
+          <button onclick="analisarAnamneseIA()" id="btnAnalisarAnamnese"
+            style="flex:1;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-size:13px">
+            🤖 Analisar com IA
+          </button>
+          <button onclick="salvarAnamnese()"
+            style="flex:1;background:#4ade80;color:#0f0f1a;border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-size:13px">
+            💾 Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Avaliação Física -->
   <div id="modalAvalFisica" class="modal" style="display:none">
     <div class="modal-content" style="max-width:560px;max-height:90vh;overflow-y:auto">
@@ -6766,6 +6826,29 @@ function showStudentDetail(id) {
     </div>
 
     ${(()=>{
+      const a = s.anamnese;
+      if(!a || (!a.dores?.length && !a.condicoes?.length && !a.queixa && !a.laudo)) return '';
+      const r = a.iaAnalise;
+      const risk = r?.nivel_risco || 'medio';
+      const riskCol = risk === 'alto' ? '#ff5252' : risk === 'medio' ? '#ffab00' : '#5b8cff';
+      const icon = risk === 'alto' ? '🚨' : '⚠️';
+      const contrLabel = r?.contraindicados?.slice(0,3).join(' · ') || '';
+      return `<div onclick="abrirAnamnese('${s.id}')" style="background:${riskCol}0d;border:1.5px solid ${riskCol}50;border-radius:14px;padding:12px 14px;margin-bottom:2px;cursor:pointer">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:22px">${icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:800;color:${riskCol}">Restrições de saúde registradas</div>
+            ${a.queixa?`<div style="font-size:11px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.queixa}</div>`:''}
+            ${a.dores?.length?`<div style="font-size:10px;color:var(--text3);margin-top:1px">🗺️ ${a.dores.slice(0,4).join(' · ')}${a.dores.length>4?' +mais':''}</div>`:''}
+            ${contrLabel?`<div style="font-size:10px;color:#ff5252;font-weight:600;margin-top:2px">❌ ${contrLabel}</div>`:''}
+            ${r?.dica_principal?`<div style="font-size:10px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">💡 ${r.dica_principal}</div>`:''}
+          </div>
+          <div style="font-size:16px;color:var(--text3);flex-shrink:0">›</div>
+        </div>
+      </div>`;
+    })()}
+
+    ${(()=>{
       const rep = getReposicoes(s.id);
       const lim = s.reposicaoLimite ?? 2;
       if(lim === 0) return '';
@@ -6858,11 +6941,11 @@ function showStudentDetail(id) {
         <div style="font-size:12px;font-weight:800;margin-top:3px">Avaliação Física</div>
         <div style="font-size:9px;color:var(--text2)">Medidas + fotos · evolução</div>
       </button>
-      <button onclick="abrirFerramentaAluno('periodizacao','${s.id}')" style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px 10px;text-align:left;cursor:pointer;color:var(--text);position:relative">
-        <div style="position:absolute;top:5px;right:5px;background:#4ade80;color:#0f0f1a;font-size:7px;font-weight:800;padding:1px 5px;border-radius:8px">EM BREVE</div>
-        <div style="font-size:20px;opacity:.6">📅</div>
-        <div style="font-size:12px;font-weight:800;margin-top:3px;opacity:.7">Periodização</div>
-        <div style="font-size:9px;color:var(--text2)">Semana ou mês</div>
+      <button onclick="abrirAnamnese('${s.id}')" style="background:${s.anamnese?.dores?.length||s.anamnese?.queixa?'linear-gradient(135deg,#ff525215,#ffab0015)':'var(--card)'};border:1.5px solid ${s.anamnese?.dores?.length||s.anamnese?.queixa?'#ffab0050':'var(--border)'};border-radius:12px;padding:12px 10px;text-align:left;cursor:pointer;color:var(--text);position:relative">
+        ${s.anamnese?.iaAnalise ? `<div style="position:absolute;top:5px;right:5px;background:${s.anamnese.iaAnalise.nivel_risco==='alto'?'#ff5252':s.anamnese.iaAnalise.nivel_risco==='medio'?'#ffab00':'#4ade80'};color:#0f0f1a;font-size:7px;font-weight:800;padding:1px 5px;border-radius:8px">${s.anamnese.iaAnalise.nivel_risco?.toUpperCase()||'OK'}</div>` : ''}
+        <div style="font-size:20px">🩺</div>
+        <div style="font-size:12px;font-weight:800;margin-top:3px">Anamnese</div>
+        <div style="font-size:9px;color:var(--text2)">${s.anamnese?.queixa?'Ver histórico':'Histórico de saúde'}</div>
       </button>
     </div>
 
@@ -6873,6 +6956,18 @@ function showStudentDetail(id) {
         <span style="background:#ff525220;color:var(--accent);border:1px solid #ff525240;border-radius:20px;font-size:9px;font-weight:800;padding:2px 7px;letter-spacing:.5px;text-transform:uppercase">Beta</span>
       </div>
       <div style="font-size:10px;color:#5b8cff;margin-bottom:8px;font-weight:700">🎓 Personal PhD: ciência de Schoenfeld + RP embarcada</div>
+      ${(()=>{
+        const an = s.anamnese;
+        if(!an?.iaAnalise?.contraindicados?.length && !an?.dores?.length) return '';
+        const r = an.iaAnalise;
+        return `<div style="background:#ff52520d;border:1px solid #ff525240;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:10px">
+          <div style="color:#ff5252;font-weight:800;margin-bottom:3px">⚠️ Restrições de saúde ativas</div>
+          ${r?.contraindicados?.length?`<div style="color:var(--text2)">❌ Evitar: ${r.contraindicados.slice(0,4).join(', ')}</div>`:''}
+          ${r?.adaptar?.length?`<div style="color:#ffab00;margin-top:2px">⚡ Adaptar: ${r.adaptar.slice(0,3).join(', ')}</div>`:''}
+          ${an.dores?.length?`<div style="color:var(--text3);margin-top:2px">🗺️ ${an.dores.join(' · ')}</div>`:''}
+          <div style="color:#5b8cff;margin-top:3px;font-style:italic">A IA já considera essas restrições na geração</div>
+        </div>`;
+      })()}
       <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.4">Descreva o objetivo do treino. Ex: "peito e tríceps intermediário 45min, hipertrofia"</div>
       <textarea id="aiPromptInput_${s.id}" placeholder="Ex: treino de pernas iniciante, 4 exercícios, foco glúteo" rows="2"
         style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:13px;resize:vertical;font-family:inherit;margin-bottom:8px"></textarea>
@@ -7075,6 +7170,8 @@ function saveStudent(e) {
       data.workouts = students[idx].workouts || [];
       if(students[idx].contratoAssinado) data.contratoAssinado = students[idx].contratoAssinado;
       if(students[idx].fotoConsent) data.fotoConsent = students[idx].fotoConsent;
+      if(students[idx].anamnese) data.anamnese = students[idx].anamnese;
+      if(students[idx].assessments) data.assessments = students[idx].assessments;
       students[idx] = data;
     }
   } else {
@@ -7425,6 +7522,242 @@ function renderPhDInsights(container, insights, isGemini, summary, treinoSugerid
     </div>`;
 }
 
+// ─── ANAMNESE ─────────────────────────────────────────────────────────────────
+const _DORES_AREAS = ['Cabeça/Pescoço','Ombro Esq.','Ombro Dir.','Cotovelo Esq.','Cotovelo Dir.','Punho/Mão E','Punho/Mão D','Col. Cervical','Col. Torácica','Col. Lombar','Peito','Abdômen/Core','Quadril Esq.','Quadril Dir.','Joelho Esq.','Joelho Dir.','Tornozelo E','Tornozelo D'];
+const _CONDICOES = ['Hipertensão','Diabetes','Doença cardíaca','Osteoporose','Artrose/Artrite','Asma/Bronquite','Hérnia de disco','Gestante/Pós-parto','Escoliose','Depressão/Ansiedade','LCA operado','Menisco','Varizes'];
+let _anamneseDoresSel = [], _anamneseCondicoesSel = [], _anamneseLib = '';
+
+function abrirAnamnese(studentId) {
+  const s = students.find(x=>x.id===studentId);
+  if(!s) return;
+  const a = s.anamnese || {};
+  document.getElementById('anamneseStudentId').value = studentId;
+  document.getElementById('anamneseNomeLabel').textContent = s.name;
+  document.getElementById('anamneseQueixa').value = a.queixa || '';
+  document.getElementById('anamneseLesoes').value = a.lesoes || '';
+  document.getElementById('anamneseMedicamentos').value = a.medicamentos || '';
+  document.getElementById('anamneseLaudo').value = a.laudo || '';
+  _anamneseDoresSel = [...(a.dores || [])];
+  _anamneseCondicoesSel = [...(a.condicoes || [])];
+  _anamneseLib = a.liberacaoMedica || '';
+  _renderAnamneseChips();
+  setLiberacao(_anamneseLib, true);
+  const iaDiv = document.getElementById('anamneseIAResult');
+  if(a.iaAnalise) { _renderAnamneseIAResult(a.iaAnalise); iaDiv.style.display='block'; }
+  else iaDiv.style.display='none';
+  document.getElementById('modalAnamnese').classList.add('show');
+}
+
+function _renderAnamneseChips() {
+  const dc = document.getElementById('anamneseDoresChips');
+  const cc = document.getElementById('anamneseCondicoesChips');
+  if(!dc || !cc) return;
+  dc.innerHTML = _DORES_AREAS.map(a=>{
+    const sel = _anamneseDoresSel.includes(a);
+    return `<button onclick="_toggleDore('${a}')" style="padding:5px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid ${sel?'#ff5252':'var(--border)'};background:${sel?'#ff52521a':'var(--card2)'};color:${sel?'#ff5252':'var(--text2)'};">${a}</button>`;
+  }).join('');
+  cc.innerHTML = _CONDICOES.map(c=>{
+    const sel = _anamneseCondicoesSel.includes(c);
+    return `<button onclick="_toggleCondicao('${c}')" style="padding:5px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid ${sel?'#ffab00':'var(--border)'};background:${sel?'#ffab001a':'var(--card2)'};color:${sel?'#ffab00':'var(--text2)'};">${c}</button>`;
+  }).join('');
+}
+
+function _toggleDore(area) {
+  const i = _anamneseDoresSel.indexOf(area);
+  if(i>=0) _anamneseDoresSel.splice(i,1); else _anamneseDoresSel.push(area);
+  _renderAnamneseChips();
+}
+function _toggleCondicao(c) {
+  const i = _anamneseCondicoesSel.indexOf(c);
+  if(i>=0) _anamneseCondicoesSel.splice(i,1); else _anamneseCondicoesSel.push(c);
+  _renderAnamneseChips();
+}
+
+function setLiberacao(val, silent) {
+  _anamneseLib = val;
+  const btns = {sim:'libSim', parcial:'libParcial', nao:'libNao'};
+  const cols = {sim:'#4ade80', parcial:'#ffab00', nao:'#ff5252'};
+  Object.keys(btns).forEach(k => {
+    const el = document.getElementById(btns[k]);
+    if(!el) return;
+    const active = k === val;
+    el.style.cssText = `flex:1;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;
+      background:${active ? cols[k]+'22' : 'var(--card2)'};
+      border:1.5px solid ${active ? cols[k] : 'var(--border)'};
+      color:${active ? cols[k] : 'var(--text2)'}`;
+  });
+}
+
+function salvarAnamnese() {
+  const studentId = document.getElementById('anamneseStudentId').value;
+  const idx = students.findIndex(x=>x.id===studentId);
+  if(idx<0) return;
+  const prev = students[idx].anamnese || {};
+  students[idx].anamnese = {
+    ...prev,
+    queixa: document.getElementById('anamneseQueixa').value.trim(),
+    dores: [..._anamneseDoresSel],
+    condicoes: [..._anamneseCondicoesSel],
+    lesoes: document.getElementById('anamneseLesoes').value.trim(),
+    medicamentos: document.getElementById('anamneseMedicamentos').value.trim(),
+    laudo: document.getElementById('anamneseLaudo').value.trim(),
+    liberacaoMedica: _anamneseLib,
+    updatedAt: new Date().toISOString().slice(0,10)
+  };
+  save();
+  document.getElementById('modalAnamnese').classList.remove('show');
+  showToast('🩺 Anamnese salva!');
+  showStudentDetail(studentId);
+}
+
+async function analisarAnamneseIA() {
+  const studentId = document.getElementById('anamneseStudentId').value;
+  const btn = document.getElementById('btnAnalisarAnamnese');
+  const queixa = document.getElementById('anamneseQueixa').value.trim();
+  const lesoes = document.getElementById('anamneseLesoes').value.trim();
+  const meds = document.getElementById('anamneseMedicamentos').value.trim();
+  const laudo = document.getElementById('anamneseLaudo').value.trim();
+  const dores = [..._anamneseDoresSel];
+  const condicoes = [..._anamneseCondicoesSel];
+
+  if(!queixa && !dores.length && !condicoes.length && !laudo && !lesoes) {
+    showToast('Preencha ao menos uma informação antes de analisar'); return;
+  }
+
+  btn.textContent = '🧠 Analisando...'; btn.disabled = true;
+  const iaDiv = document.getElementById('anamneseIAResult');
+  iaDiv.style.display = 'none';
+
+  const payload = { queixa, dores, condicoes, lesoes, medicamentos: meds, laudo };
+
+  try {
+    const sb = getSB();
+    if(!sb) throw new Error('offline');
+    const prompt = `Você é um profissional de Educação Física especialista em prescrição segura.
+Analise a anamnese abaixo e retorne um JSON com o seguinte formato EXATO:
+{
+  "resumo": "resumo em 1-2 frases",
+  "nivel_risco": "baixo|medio|alto",
+  "contraindicados": ["exercício1","exercício2"],
+  "adaptar": ["exercício ou padrão de movimento que precisa de adaptação"],
+  "recomendados": ["tipo de exercício indicado"],
+  "alertas": ["alerta importante"],
+  "dica_principal": "uma dica prática para o personal"
+}
+
+ANAMNESE:
+Queixa: ${queixa || 'nenhuma'}
+Regiões de dor: ${dores.join(', ') || 'nenhuma'}
+Condições médicas: ${condicoes.join(', ') || 'nenhuma'}
+Lesões anteriores: ${lesoes || 'nenhuma'}
+Medicamentos: ${meds || 'nenhum'}
+Laudo médico: ${laudo || 'nenhum'}
+
+Responda APENAS o JSON, sem texto antes ou depois.`;
+
+    const { data, error } = await sb.functions.invoke('gemini-proxy', { body: { prompt } });
+    if(error) throw error;
+    let raw = (data?.text || data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    raw = raw.replace(/^```json\n?/,'').replace(/\n?```$/,'').trim();
+    const analise = JSON.parse(raw);
+    const idx = students.findIndex(x=>x.id===studentId);
+    if(idx>=0) {
+      students[idx].anamnese = students[idx].anamnese || {};
+      students[idx].anamnese.iaAnalise = analise;
+      students[idx].anamnese.iaDataAnalise = new Date().toISOString().slice(0,10);
+      save();
+    }
+    _renderAnamneseIAResult(analise);
+    iaDiv.style.display = 'block';
+    showToast('✅ Análise IA concluída!');
+  } catch(err) {
+    const analise = _anamneseAnaliseFallback(payload);
+    const idx = students.findIndex(x=>x.id===studentId);
+    if(idx>=0) {
+      students[idx].anamnese = students[idx].anamnese || {};
+      students[idx].anamnese.iaAnalise = analise;
+      students[idx].anamnese.iaDataAnalise = new Date().toISOString().slice(0,10);
+      save();
+    }
+    _renderAnamneseIAResult(analise);
+    iaDiv.style.display = 'block';
+    showToast('⚡ Análise offline aplicada');
+  } finally {
+    btn.textContent = '🤖 Analisar com IA'; btn.disabled = false;
+  }
+}
+
+function _renderAnamneseIAResult(a) {
+  const div = document.getElementById('anamneseIAResult');
+  if(!div || !a) return;
+  const riskCol = a.nivel_risco==='alto'?'#ff5252':a.nivel_risco==='medio'?'#ffab00':'#4ade80';
+  const riskLabel = a.nivel_risco==='alto'?'🚨 Risco Alto':a.nivel_risco==='medio'?'⚠️ Risco Médio':'✅ Risco Baixo';
+  const listHtml = (arr, col, icon) => arr?.length
+    ? `<ul style="margin:4px 0 0;padding-left:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px">${arr.map(x=>`<li style="background:${col}15;color:${col};border:1px solid ${col}40;border-radius:10px;padding:2px 9px;font-size:10px;font-weight:700">${icon} ${x}</li>`).join('')}</ul>` : '';
+
+  div.innerHTML = `<div style="background:${riskCol}0d;border:1.5px solid ${riskCol}40;border-radius:12px;padding:12px 14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:12px;font-weight:800;color:${riskCol}">${riskLabel}</div>
+      <div style="font-size:9px;color:var(--text3)">Análise IA</div>
+    </div>
+    ${a.resumo?`<div style="font-size:11px;color:var(--text);margin-bottom:10px;line-height:1.5">${a.resumo}</div>`:''}
+    ${a.contraindicados?.length?`<div style="font-size:10px;font-weight:700;color:#ff5252;margin-bottom:3px">❌ Contraindicados</div>${listHtml(a.contraindicados,'#ff5252','❌')}<div style="margin-bottom:8px"></div>`:''}
+    ${a.adaptar?.length?`<div style="font-size:10px;font-weight:700;color:#ffab00;margin-bottom:3px">⚡ Adaptar</div>${listHtml(a.adaptar,'#ffab00','⚡')}<div style="margin-bottom:8px"></div>`:''}
+    ${a.recomendados?.length?`<div style="font-size:10px;font-weight:700;color:#4ade80;margin-bottom:3px">✅ Recomendados</div>${listHtml(a.recomendados,'#4ade80','✅')}<div style="margin-bottom:8px"></div>`:''}
+    ${a.alertas?.length?`<div style="font-size:10px;font-weight:700;color:#ffab00;margin-bottom:3px">⚠️ Alertas</div>${a.alertas.map(x=>`<div style="font-size:10px;color:var(--text2);padding:2px 0">• ${x}</div>`).join('')}<div style="margin-bottom:6px"></div>`:''}
+    ${a.dica_principal?`<div style="background:#5b8cff15;border-radius:8px;padding:8px 10px;font-size:11px;color:#5b8cff;font-style:italic;line-height:1.4">💡 ${a.dica_principal}</div>`:''}
+  </div>`;
+}
+
+function _anamneseAnaliseFallback({queixa, dores, condicoes, lesoes, meds, laudo}) {
+  const contraindicados = [], adaptar = [], recomendados = [], alertas = [];
+  const texto = [queixa, dores.join(' '), condicoes.join(' '), lesoes, laudo].join(' ').toLowerCase();
+  if(texto.includes('lombar')||texto.includes('hérnia')||texto.includes('hernia')||texto.includes('l4')||texto.includes('l5')) {
+    contraindicados.push('Agachamento com carga', 'Levantamento terra convencional', 'Hiperextensão');
+    adaptar.push('Agachamento → sentar-levantar ou leg press','Abdominais → prancha');
+    recomendados.push('Core estabilizador','Natação ou aqua','Hip hinge com controle');
+  }
+  if(texto.includes('joelho')||texto.includes('lca')||texto.includes('menisco')) {
+    contraindicados.push('Agachamento profundo', 'Corrida em declive', 'Impacto alto');
+    adaptar.push('Agachamento → parcial ou cadeira extensora leve');
+    recomendados.push('Fortalecimento quadríceps','Bike ergométrica','Leg press amplitude controlada');
+  }
+  if(texto.includes('ombro')||texto.includes('manguito')||texto.includes('impingement')) {
+    contraindicados.push('Supino aberto', 'Elevação lateral acima 90°', 'Barra fixa pegada pronada');
+    adaptar.push('Press → neutro ou halteres','Puxadas → pegada supinada');
+    recomendados.push('Rotadores do manguito','Press neutro','Remada baixa');
+  }
+  if(texto.includes('hipertensão')||condicoes.includes('Hipertensão')) {
+    contraindicados.push('Valsalva / apneia', 'Isometria prolongada');
+    alertas.push('Monitorar PA antes e depois','Evitar exercícios com cabeça abaixo do coração');
+    recomendados.push('Aeróbico moderado','Musculação em circuito');
+  }
+  if(texto.includes('diabetes')||condicoes.includes('Diabetes')) {
+    alertas.push('Verificar glicemia antes do treino','Ter fonte de açúcar disponível');
+    recomendados.push('Caminhada','Musculação de intensidade moderada');
+  }
+  if(texto.includes('osteoporose')||condicoes.includes('Osteoporose')) {
+    contraindicados.push('Exercícios de impacto alto', 'Flexão de coluna com carga');
+    recomendados.push('Musculação progressiva','Exercícios de impacto leve','Caminhada');
+  }
+  if(condicoes.includes('Gestante/Pós-parto')) {
+    contraindicados.push('Impacto alto','Exercícios deitados após 1º trimestre','Valsalva');
+    adaptar.push('Agachamento → sumo ou wall sit','Abdominais → diafragmático');
+    alertas.push('Libração obstétrica obrigatória');
+    recomendados.push('Caminhada','Yoga/Pilates','Musculação leve');
+  }
+  let nivel_risco = 'baixo';
+  if(contraindicados.length >= 3 || condicoes.includes('Doença cardíaca') || texto.includes('cardíaca')) nivel_risco = 'alto';
+  else if(contraindicados.length >= 1 || alertas.length >= 1) nivel_risco = 'medio';
+  if(!recomendados.length) recomendados.push('Treinamento funcional leve', 'Aeróbico de baixo impacto');
+  return {
+    resumo: contraindicados.length ? `Restrições identificadas. Prescrição adaptada para ${dores.slice(0,2).join(' e ')||'condições reportadas'}.` : 'Anamnese sem contraindicações absolutas encontradas.',
+    nivel_risco, contraindicados, adaptar, recomendados, alertas,
+    dica_principal: alertas[0] || (contraindicados[0] ? `Evite ${contraindicados[0]} e priorize exercícios dentro da amplitude de conforto.` : 'Progrida de forma gradual e monitore feedbacks do aluno a cada sessão.')
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function generateAIWorkout(studentId) {
   const input = document.getElementById('aiPromptInput_'+studentId);
   const btn = document.getElementById('aiGenBtn_'+studentId);
@@ -7435,7 +7768,18 @@ function generateAIWorkout(studentId) {
 
   setTimeout(()=>{
     const cfg = _parsePrompt(prompt);
-    const exs = _pickExercises(cfg.groups, cfg.count);
+    const st = students.find(x=>x.id===studentId);
+    const anamnese = st?.anamnese;
+    const contraindicados = anamnese?.iaAnalise?.contraindicados || [];
+    const adaptar = anamnese?.iaAnalise?.adaptar || [];
+    const doresAtivas = anamnese?.dores || [];
+
+    const allExs = _pickExercises(cfg.groups, cfg.count + 4);
+    const exs = allExs.filter(ex => {
+      const nome = (ex.name||'').toLowerCase();
+      return !contraindicados.some(c => nome.includes(c.toLowerCase().split(' ')[0]));
+    }).slice(0, cfg.count);
+
     const reps = _setsReps(cfg.level, cfg.goal);
     const title = 'Treino ' + cfg.groups.map(g=>g[0].toUpperCase()+g.slice(1)).join(' + ');
     const subtitle = `${cfg.duration}min · ${cfg.level} · ${cfg.goal}`;
@@ -7443,10 +7787,18 @@ function generateAIWorkout(studentId) {
     const finisher = cfg.duration >= 45 ? '\n\nFinalizador: Prancha 3x30s' : '';
     const fullText = lines + finisher;
 
+    const alertaAnamnese = (contraindicados.length || doresAtivas.length) ? `
+      <div style="background:#ff52520d;border:1px solid #ff525230;border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:10px">
+        <div style="color:#ff5252;font-weight:800;margin-bottom:2px">🩺 Gerado com restrições ativas</div>
+        ${contraindicados.length?`<div style="color:var(--text2)">❌ Excluídos: ${contraindicados.slice(0,4).join(', ')}</div>`:''}
+        ${adaptar.length?`<div style="color:#ffab00;margin-top:1px">⚡ Adaptados: ${adaptar.slice(0,3).join(', ')}</div>`:''}
+      </div>` : '';
+
     result.innerHTML = `
       <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-top:6px">
         <div style="font-size:13px;font-weight:700;margin-bottom:2px">${title}</div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">${subtitle}</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${subtitle}</div>
+        ${alertaAnamnese}
         <pre style="font-size:12px;white-space:pre-wrap;color:var(--text);font-family:inherit;line-height:1.6;margin:0">${fullText}</pre>
         <div style="display:flex;gap:6px;margin-top:12px">
           <button onclick="saveAIWorkout('${studentId}', \`${title.replace(/`/g,'')}\`, \`${fullText.replace(/`/g,'')}\`)" style="flex:1;background:var(--green);color:#fff;border:none;border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-size:12px">💾 Salvar como treino</button>
