@@ -1781,6 +1781,25 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     </div>
   </details>
 
+  <!-- 📋 REGRAS & CONTRATO -->
+  <details class="config-section" style="margin-top:12px">
+    <summary style="cursor:pointer;list-style:none;background:var(--card);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px">
+      <span>📋 Regras & Contrato</span>
+      <span style="font-size:18px;color:var(--text3)" class="config-chevron">▾</span>
+    </summary>
+    <div style="margin-top:10px">
+      <div class="card">
+        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">Cláusulas do contrato</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Escreva suas regras. Use <strong style="color:var(--text2)">{nome}</strong> e <strong style="color:var(--text2)">{valor}</strong> pra preencher automaticamente por aluno.</div>
+        <textarea id="contratoTemplate" rows="10"
+          style="width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:12px;border-radius:12px;font-size:12px;line-height:1.7;resize:vertical;font-family:inherit"
+          placeholder="Ex: 1. O aluno {nome} contrata os serviços de personal trainer pelo valor de R$ {valor}/mês..."></textarea>
+        <button onclick="salvarContratoTemplate()" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-size:13px;margin-top:10px">💾 Salvar cláusulas</button>
+        <button onclick="_carregarClausulasDefault()" style="width:100%;background:transparent;color:var(--text2);border:1.5px solid var(--border);border-radius:12px;padding:10px;font-weight:600;cursor:pointer;font-size:12px;margin-top:8px">📄 Usar modelo padrão</button>
+      </div>
+    </div>
+  </details>
+
   <!-- 🌟 AVALIAR (compacto) -->
   <div class="card" style="background:linear-gradient(135deg,#1a1a2e,#1a2240);border:1.5px solid #5b8cff40;margin-top:14px">
     <div style="display:flex;align-items:center;gap:12px">
@@ -2692,6 +2711,20 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+function showActionToast(msg, actionLabel, actionFn) {
+  let at = document.getElementById('actionToast');
+  if(!at) {
+    at = document.createElement('div');
+    at.id = 'actionToast';
+    at.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-200px);background:var(--card2);color:var(--text);padding:12px 16px;border-radius:14px;font-size:13px;font-weight:600;z-index:401;box-shadow:0 8px 30px #00000060;transition:.3s;border:1px solid #ffffff10;display:flex;align-items:center;gap:12px;white-space:nowrap;max-width:90vw';
+    document.body.appendChild(at);
+  }
+  at.innerHTML = `<span>${msg}</span><button onclick="document.getElementById('actionToast').style.transform='translateX(-50%) translateY(-200px)';(${actionFn.toString()})();" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">${actionLabel}</button>`;
+  at.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(at._t);
+  at._t = setTimeout(()=>{ at.style.transform = 'translateX(-50%) translateY(-200px)'; }, 5000);
 }
 
 function showPage(name) {
@@ -4970,7 +5003,26 @@ function getReposicoes(id) {
 function addReposicao(id) {
   const key = 'rep_' + new Date().toISOString().slice(0,7) + '_' + id;
   attendance[key] = getReposicoes(id) + 1;
-  save(); openStudent(id);
+  save();
+  const s = students.find(x=>x.id===id);
+  const lim = s?.reposicaoLimite ?? 2;
+  const rep = getReposicoes(id);
+  const atLim = lim > 0 && rep >= lim;
+  const primeiro = s?.name?.split(' ')[0] || s?.name || 'Aluno';
+  if(s?.phone) {
+    const msg = atLim
+      ? `Olá ${primeiro}! ✅ Reposição de aula registrada.\n\n⚠️ Você atingiu o limite de ${lim} reposição${lim!==1?'ões':''} deste mês. A próxima estará disponível no mês seguinte.\n\nQualquer dúvida é só me chamar 💪`
+      : `Olá ${primeiro}! ✅ Reposição de aula registrada.\n\n📊 ${rep} de ${lim} reposição${lim!==1?'ões':''} usada${rep!==1?'s':''} este mês — ainda ${lim-rep} disponível${(lim-rep)!==1?'is':''}.\n\nQualquer dúvida é só me chamar 💪`;
+    const phone = s.phone.replace(/\D/g,'');
+    showActionToast(
+      atLim ? `⚠️ Limite atingido (${rep}/${lim})` : `✅ Reposição (${rep}/${lim})`,
+      '📲 Avisar aluno',
+      () => { window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank'); }
+    );
+  } else {
+    showToast(atLim ? `⚠️ Limite atingido — ${rep}/${lim} reposições` : `✅ Reposição registrada (${rep}/${lim})`);
+  }
+  openStudent(id);
 }
 function removeReposicao(id) {
   const key = 'rep_' + new Date().toISOString().slice(0,7) + '_' + id;
@@ -6649,6 +6701,25 @@ function showStudentDetail(id) {
       </div>`;
     })()}
 
+    ${(()=>{
+      const assinado = s.contratoAssinado;
+      const temTemplate = !!(localStorage.getItem('coachorg_contrato_template') || '').trim();
+      if(!temTemplate) return '';
+      const col = assinado ? '#4ade80' : '#ffab00';
+      const label = assinado ? `✅ Assinado por ${assinado.nome}` : '⚠️ Pendente de assinatura';
+      const sub = assinado ? `em ${new Date(assinado.data).toLocaleDateString('pt-BR')}` : 'Aluno ainda não assinou';
+      return `<div class="card" style="border:1px solid ${col}30">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--text)">📋 Contrato</div>
+            <div style="font-size:11px;color:${col};margin-top:2px;font-weight:600">${label}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">${sub}</div>
+          </div>
+          <button onclick="abrirContrato('${s.id}')" style="background:${assinado?'var(--card2)':'var(--accent)'};color:${assinado?'var(--text2)':'#fff'};border:${assinado?'1.5px solid var(--border)':'none'};border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;flex-shrink:0">${assinado?'Ver contrato':'Fazer assinar'}</button>
+        </div>
+      </div>`;
+    })()}
+
     <div class="card">
       <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dias de Treino</div>
       <div class="student-days" style="gap:6px">
@@ -6913,6 +6984,7 @@ function saveStudent(e) {
     if(idx>=0) {
       data.id = id;
       data.workouts = students[idx].workouts || [];
+      if(students[idx].contratoAssinado) data.contratoAssinado = students[idx].contratoAssinado;
       students[idx] = data;
     }
   } else {
@@ -8316,6 +8388,10 @@ function renderCoachIA() {
     pushBtn.style.opacity = '.5';
   }
 
+  // Populate contrato template textarea
+  const ctEl = document.getElementById('contratoTemplate');
+  if(ctEl) ctEl.value = localStorage.getItem('coachorg_contrato_template') || '';
+
   // Render insights (heuristics primeiro, IA real em background se Pro)
   const container = document.getElementById('aiInsightsContainer');
   if(!container) return;
@@ -8938,6 +9014,124 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{
     }
   });
 });
+
+// ——— CONTRATO DIGITAL ———
+
+const _CLAUSULAS_DEFAULT = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE PERSONAL TRAINER
+
+Contratante: {nome}
+Valor mensal: R$ {valor}
+Data: {data}
+
+CLÁUSULAS:
+
+1. SERVIÇOS
+O Personal Trainer prestará serviços de acompanhamento e prescrição de exercícios físicos de forma personalizada, conforme dias e horários acordados entre as partes.
+
+2. PAGAMENTO
+O pagamento deverá ser efetuado todo dia {dia_pagamento} de cada mês. O atraso superior a 5 dias úteis implica suspensão das sessões até regularização.
+
+3. REPOSIÇÃO DE AULAS
+São garantidas até {limite_reposicoes} reposição(ões) por mês, desde que solicitadas com antecedência mínima de 24h. Faltas sem aviso prévio não geram direito à reposição.
+
+4. CANCELAMENTO
+O cancelamento do contrato deve ser comunicado com 15 dias de antecedência. Valores pagos antecipadamente não são reembolsados.
+
+5. SAÚDE E RESPONSABILIDADE
+O contratante declara estar apto à prática de exercícios físicos e compromete-se a informar qualquer condição de saúde que possa interferir nos treinos. O Personal Trainer não se responsabiliza por lesões decorrentes de informações omitidas.
+
+6. USO DE IMAGEM
+O contratante autoriza o uso de fotos de evolução para fins de divulgação profissional, preservando a possibilidade de revogar esta autorização a qualquer momento.
+
+7. FORO
+Fica eleito o foro do domicílio do contratante para dirimir eventuais conflitos.`;
+
+function salvarContratoTemplate() {
+  const txt = document.getElementById('contratoTemplate')?.value?.trim();
+  if(!txt) { showToast('Escreva as cláusulas antes de salvar'); return; }
+  localStorage.setItem('coachorg_contrato_template', txt);
+  showToast('✅ Cláusulas salvas!');
+}
+
+function _carregarClausulasDefault() {
+  const el = document.getElementById('contratoTemplate');
+  if(el) el.value = _CLAUSULAS_DEFAULT;
+}
+
+function _renderContratoTexto(s) {
+  const template = localStorage.getItem('coachorg_contrato_template') || _CLAUSULAS_DEFAULT;
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  return template
+    .replace(/\{nome\}/g, s.name || '')
+    .replace(/\{valor\}/g, s.value || '---')
+    .replace(/\{data\}/g, hoje)
+    .replace(/\{dia_pagamento\}/g, s.payDay || '---')
+    .replace(/\{limite_reposicoes\}/g, s.reposicaoLimite ?? 2);
+}
+
+function abrirContrato(studentId) {
+  const s = students.find(x=>x.id===studentId);
+  if(!s) return;
+  let m = document.getElementById('modalContrato');
+  if(!m) {
+    m = document.createElement('div');
+    m.id = 'modalContrato';
+    m.className = 'modal-overlay';
+    m.onclick = e => { if(e.target===m) m.classList.remove('show'); };
+    document.body.appendChild(m);
+  }
+  const assinado = s.contratoAssinado;
+  const texto = _renderContratoTexto(s);
+  m.innerHTML = `
+  <div class="modal" style="max-width:480px;margin:16px auto;max-height:90vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <div class="modal-title">📋 Contrato — ${s.name.split(' ')[0]}</div>
+      <button class="modal-close" onclick="document.getElementById('modalContrato').classList.remove('show')">×</button>
+    </div>
+    <div style="overflow-y:auto;padding:0 20px 24px;flex:1">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+        <pre style="font-size:11px;color:var(--text);white-space:pre-wrap;line-height:1.7;font-family:inherit;margin:0">${texto}</pre>
+      </div>
+      ${assinado ? `
+        <div style="background:#4ade8015;border:1.5px solid #4ade8040;border-radius:12px;padding:14px;text-align:center">
+          <div style="font-size:14px;font-weight:800;color:#4ade80;margin-bottom:4px">✅ Contrato assinado</div>
+          <div style="font-size:12px;color:var(--text2)">Por: <strong style="color:var(--text)">${assinado.nome}</strong></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${new Date(assinado.data).toLocaleString('pt-BR')}</div>
+        </div>
+        <button onclick="if(confirm('Remover assinatura de ${s.name.split(' ')[0]}?')){_removerAssinatura('${studentId}')}" style="width:100%;background:transparent;border:1.5px solid #ff525240;color:#ff5252;border-radius:12px;padding:11px;font-weight:700;cursor:pointer;font-size:12px;margin-top:10px">Remover assinatura</button>
+      ` : `
+        <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:600">Assinatura do aluno</div>
+        <input id="contratoNomeInput" type="text" placeholder="Aluno digita o nome completo aqui"
+          style="width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:14px;border-radius:12px;font-size:14px;margin-bottom:10px;font-family:inherit">
+        <button onclick="assinarContrato('${studentId}')" style="width:100%;background:linear-gradient(135deg,#4ade80,#22c55e);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:14px">✍️ Assinar este contrato</button>
+        <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.5">Ao assinar, o aluno confirma que leu e concordou com todas as cláusulas acima.</div>
+      `}
+    </div>
+  </div>`;
+  m.classList.add('show');
+}
+
+function assinarContrato(studentId) {
+  const nome = document.getElementById('contratoNomeInput')?.value?.trim();
+  if(!nome || nome.length < 3) { showToast('Nome completo obrigatório'); return; }
+  const idx = students.findIndex(x=>x.id===studentId);
+  if(idx<0) return;
+  students[idx].contratoAssinado = { nome, data: new Date().toISOString() };
+  save();
+  showToast(`✅ Contrato assinado por ${nome}`);
+  document.getElementById('modalContrato').classList.remove('show');
+  openStudent(studentId);
+}
+
+function _removerAssinatura(studentId) {
+  const idx = students.findIndex(x=>x.id===studentId);
+  if(idx<0) return;
+  delete students[idx].contratoAssinado;
+  save();
+  showToast('Assinatura removida');
+  document.getElementById('modalContrato').classList.remove('show');
+  openStudent(studentId);
+}
 
 // Service Worker
 if('serviceWorker' in navigator) {
