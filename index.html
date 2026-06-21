@@ -999,6 +999,7 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       <div class="header-sub" id="headerSub">Carregando...</div>
     </div>
   </div>
+  <span id="syncIndicator" title="Sincronizado" style="font-size:14px;opacity:.6;cursor:default"></span>
 </div>
 
 <!-- PAGE: HOME -->
@@ -2455,13 +2456,12 @@ async function initAuth() {
   const sb = getSB();
   if(!sb) { updateAuthUI(); return; }
   const { data: { session } } = await sb.auth.getSession();
-  if(session?.user) { currentUser = session.user; await checkProStatus(); }
+  if(session?.user) { currentUser = session.user; await checkProStatus(); await loadFromCloud(); }
   updateAuthUI();
-  // Processa link de cortesia depois que a sessão foi carregada
   if(new URLSearchParams(location.search).get('vip')) checkCourtesyURL();
   sb.auth.onAuthStateChange(async (event, session) => {
     currentUser = session?.user || null;
-    if(currentUser) await checkProStatus();
+    if(currentUser) { await checkProStatus(); await loadFromCloud(); }
     updateAuthUI();
   });
 }
@@ -2699,9 +2699,61 @@ async function handleWallSignup() {
 let selectedWeekDay = new Date().getDay();
 
 function save() {
+  const now = new Date().toISOString();
   localStorage.setItem('pp_students', JSON.stringify(students));
   localStorage.setItem('pp_settings', JSON.stringify(settings));
   localStorage.setItem('pp_attendance', JSON.stringify(attendance));
+  localStorage.setItem('pp_updated_at', now);
+  if(currentUser) syncToCloud(now);
+}
+
+let _syncTimer = null;
+function syncToCloud(ts) {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(async () => {
+    const sb = getSB();
+    if(!sb || !currentUser) return;
+    try {
+      await sb.from('coach_data').upsert({
+        user_id: currentUser.id,
+        students: students,
+        settings: settings,
+        attendance: attendance,
+        updated_at: ts || new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      const ind = document.getElementById('syncIndicator');
+      if(ind) { ind.textContent = '☁️'; ind.title = 'Salvo na nuvem'; }
+    } catch(e) {
+      const ind = document.getElementById('syncIndicator');
+      if(ind) { ind.textContent = '⚠️'; ind.title = 'Erro ao sincronizar'; }
+    }
+  }, 1500);
+}
+
+async function loadFromCloud() {
+  const sb = getSB();
+  if(!sb || !currentUser) return;
+  try {
+    const { data, error } = await sb.from('coach_data').select('*').eq('user_id', currentUser.id).single();
+    if(error || !data) return;
+    const localTs = localStorage.getItem('pp_updated_at') || '0';
+    if(data.updated_at > localTs) {
+      students = data.students || [];
+      settings = data.settings || settings;
+      attendance = data.attendance || {};
+      localStorage.setItem('pp_students', JSON.stringify(students));
+      localStorage.setItem('pp_settings', JSON.stringify(settings));
+      localStorage.setItem('pp_attendance', JSON.stringify(attendance));
+      localStorage.setItem('pp_updated_at', data.updated_at);
+      if(typeof renderHome === 'function') renderHome();
+      if(typeof renderStudents === 'function') renderStudents();
+      if(typeof renderPayments === 'function') renderPayments();
+      if(typeof renderSchedule === 'function') renderSchedule();
+      showToast('☁️ Dados sincronizados!');
+    } else if(!data.updated_at) {
+      syncToCloud();
+    }
+  } catch(e) { /* usa dados locais */ }
 }
 
 function updateAdBanner() {
