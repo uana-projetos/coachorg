@@ -8932,13 +8932,7 @@ async function checkCourtesyURL() {
     }
 
     const planoLabel = plan === 'cortesia' ? '3 meses grátis Pro' : 'Acesso Pro liberado';
-    const mostrou = showCourtesyWelcome(planoLabel);
-    if(!mostrou) {
-      const msg = jaAtivouAntes
-        ? '🎁 Você já tinha acesso ativo. Bem-vindo de volta!'
-        : (plan === 'cortesia' ? '🎁 Cortesia de 3 meses ativada! Bem-vindo!' : '🎁 Acesso ativado! Bem-vindo!');
-      showToast(msg);
-    }
+    showVipPlatformSelector(planoLabel, jaAtivouAntes);
 
     history.replaceState({}, '', location.pathname);
     setTimeout(()=>{ renderHome(); renderCoachIA(); }, 400);
@@ -9195,6 +9189,115 @@ function showInstallHelperIfNeeded() {
   // 3. Android Chrome (primeira visita — alguns Chromes não disparam beforeinstallprompt na hora)
   if(!inApp && !ios && !android) return false;
   return showCourtesyWelcome(null);
+}
+
+function showVipPlatformSelector(planoLabel, jaAtivou) {
+  var el = document.getElementById('vipPlatformOverlay');
+  if(el) el.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'vipPlatformOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.80);display:flex;flex-direction:column;justify-content:flex-end';
+
+  function fechar() { overlay.remove(); }
+
+  function instrucoes(plat) {
+    var steps = {
+      computador: {
+        emoji: '💻', titulo: 'Computador',
+        cor: '#5b8cff',
+        passos: [
+          { n:'1', t:'Abre o Chrome ou Edge', d:'No seu computador (Windows ou Mac)' },
+          { n:'2', t:'Ícone ⊕ na barra de endereço', d:'Canto direito da barra de endereço do Chrome — toca em "Instalar CoachOrg"' },
+          { n:'3', t:'Clica em "Instalar"', d:'O app abre numa janela separada — sem barra do navegador' }
+        ],
+        obs: '💡 Se não aparecer o ícone, usa o menu ⋮ → "Instalar CoachOrg como app"'
+      },
+      android: {
+        emoji: '🤖', titulo: 'Android',
+        cor: '#4ade80',
+        passos: [
+          { n:'1', t:'Abre no Chrome', d:'Certifica que tá no Google Chrome (não Firefox nem Samsung)' },
+          { n:'2', t:'Toca em ⋮ (3 pontinhos)', d:'Canto superior direito do Chrome' },
+          { n:'3', t:'Toca "Instalar app"', d:'Ou "Adicionar à tela inicial" — o ícone aparece na tela do celular' }
+        ],
+        obs: null,
+        temPrompt: !!(window._deferredInstallPrompt || window.deferredPrompt)
+      },
+      iphone: {
+        emoji: '🍎', titulo: 'iPhone',
+        cor: '#a78bfa',
+        passos: [
+          { n:'1', t:'Abre no Safari', d:'⚠️ Só funciona no Safari — não no Chrome do iPhone' },
+          { n:'2', t:'Toca em 📤 Compartilhar', d:'Quadrado com seta pra cima — barra de baixo do Safari' },
+          { n:'3', t:'Toca "Adicionar à Tela de Início"', d:'Rola a lista pra baixo até achar — depois toca "Adicionar"' }
+        ],
+        obs: '⚠️ Se abriu pelo WhatsApp ou Instagram: toca nos 3 pontinhos → "Abrir no Safari"'
+      }
+    };
+    var s = steps[plat];
+    var cor = s.cor;
+    var passosHtml = s.passos.map(function(p) {
+      return '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'+
+        '<div style="background:'+cor+';color:'+(plat==='android'?'#0a0a0a':'#fff')+';width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0">'+p.n+'</div>'+
+        '<div style="background:var(--card2);border-radius:12px;padding:12px;flex:1;border:1px solid '+cor+'30">'+
+          '<div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:3px">'+p.t+'</div>'+
+          '<div style="font-size:11px;color:var(--text2);line-height:1.5">'+p.d+'</div>'+
+        '</div></div>';
+    }).join('');
+    var obsHtml = s.obs ? '<div style="background:'+cor+'15;border:1px solid '+cor+'40;border-radius:12px;padding:12px;margin-bottom:14px;font-size:11px;color:'+cor+';line-height:1.5">'+s.obs+'</div>' : '';
+    var promptBtn = (plat==='android' && s.temPrompt) ?
+      '<button onclick="tentarInstalarPWA()" style="width:100%;background:'+cor+';color:#0a0a0a;border:none;border-radius:14px;padding:15px;font-weight:900;font-size:15px;cursor:pointer;margin-bottom:10px;box-shadow:0 6px 20px '+cor+'40">📲 INSTALAR AGORA</button>' : '';
+
+    sheet.innerHTML =
+      '<div style="width:36px;height:4px;background:#ffffff25;border-radius:2px;margin:0 auto 18px"></div>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">'+
+        '<button onclick="voltarSelector()" style="background:var(--card2);border:none;color:var(--text2);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer">← Voltar</button>'+
+        '<div style="font-size:18px;font-weight:900;color:#fff">'+s.emoji+' '+s.titulo+'</div>'+
+        '<button onclick="document.getElementById(\'vipPlatformOverlay\').remove()" style="margin-left:auto;background:transparent;border:none;color:#555;font-size:22px;cursor:pointer">×</button>'+
+      '</div>'+
+      passosHtml+
+      obsHtml+
+      promptBtn+
+      '<button onclick="document.getElementById(\'vipPlatformOverlay\').remove()" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:15px;font-weight:800;font-size:14px;cursor:pointer">✅ Já instalei — Entrar no app</button>';
+  }
+
+  function mostrarSelector() {
+    sheet.innerHTML =
+      '<div style="width:36px;height:4px;background:#ffffff25;border-radius:2px;margin:0 auto 18px"></div>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+
+        '<div style="font-size:26px">🎁</div>'+
+        '<div>'+
+          '<div style="font-size:17px;font-weight:900;color:#fff">'+(jaAtivou?'Bem-vindo de volta!':'Cortesia ativada!')+'</div>'+
+          '<div style="font-size:12px;color:#4ade80;font-weight:700;margin-top:2px">'+planoLabel+'</div>'+
+        '</div>'+
+        '<button onclick="document.getElementById(\'vipPlatformOverlay\').remove()" style="margin-left:auto;background:transparent;border:none;color:#555;font-size:22px;cursor:pointer">×</button>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.5">Escolha seu dispositivo pra ver como instalar o app:</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px">'+
+        _cardPlat('computador','💻','Computador','#5b8cff')+
+        _cardPlat('android','🤖','Android','#4ade80')+
+        _cardPlat('iphone','🍎','iPhone','#a78bfa')+
+      '</div>'+
+      '<button onclick="document.getElementById(\'vipPlatformOverlay\').remove()" style="width:100%;background:transparent;border:1.5px solid #ffffff20;color:var(--text2);border-radius:14px;padding:13px;font-weight:600;font-size:13px;cursor:pointer">Já tenho instalado — só entrar</button>';
+  }
+
+  function _cardPlat(id, emoji, label, cor) {
+    return '<div onclick="selecionarPlat(\''+id+'\')" style="background:var(--card2);border:1.5px solid '+cor+'40;border-radius:16px;padding:16px 8px;text-align:center;cursor:pointer;transition:.2s" '+
+      'onmouseover="this.style.borderColor=\''+cor+'\';this.style.transform=\'scale(1.04)\'" '+
+      'onmouseout="this.style.borderColor=\''+cor+'40\';this.style.transform=\'scale(1)\'">'+
+      '<div style="font-size:28px;margin-bottom:6px">'+emoji+'</div>'+
+      '<div style="font-size:11px;font-weight:800;color:#fff;line-height:1.2">'+label+'</div>'+
+    '</div>';
+  }
+
+  window.selecionarPlat = function(plat) { instrucoes(plat); };
+  window.voltarSelector = function() { mostrarSelector(); };
+
+  var sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--bg,#0A0704);border-radius:24px 24px 0 0;padding:22px 18px 36px;max-height:88vh;overflow-y:auto;border-top:1.5px solid #ffffff12';
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+  mostrarSelector();
 }
 
 function showCourtesyWelcome(planoLabel) {
