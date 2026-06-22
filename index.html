@@ -1382,6 +1382,16 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
         <span style="color:var(--text3);font-size:14px">›</span>
       </button>
 
+      <!-- 🏋️ Montar Treino -->
+      <button onclick="fecharMenuMais();showPage('eu');setTimeout(()=>document.getElementById('treinoDestino')?.scrollIntoView({behavior:'smooth',block:'start'}),200)" style="width:100%;background:linear-gradient(135deg,#1a1a2e,#1a2240);border:1.5px solid #9c5bff60;border-radius:12px;padding:14px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:14px;color:var(--text)">
+        <span style="font-size:22px">🏋️</span>
+        <div style="flex:1">
+          <div style="font-weight:800">Montar Treino</div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600">PhD auto · Manual · Analisar · Pra mim ou aluno</div>
+        </div>
+        <span style="color:var(--text3);font-size:14px">›</span>
+      </button>
+
       <!-- ⚙️ Configurações -->
       <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:6px">⚙️ CONFIGURAÇÕES</div>
       <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
@@ -1702,6 +1712,21 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       <div>
         <div style="font-size:15px;font-weight:800;color:#fff">Personal PhD</div>
         <div style="font-size:10px;color:#9c5bff;font-weight:600">IA com 30 anos em biomecânica · Schoenfeld · RP</div>
+      </div>
+    </div>
+
+    <!-- Destino: pra mim ou pro aluno -->
+    <div id="treinoDestino" style="margin-bottom:14px">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:6px">Destino do treino</div>
+      <div style="display:flex;gap:6px">
+        <button id="destBtnEu" onclick="setTreinoDestino('eu')" style="flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid #9c5bff;background:#9c5bff;color:#fff;transition:all .2s">🏋️ Pra mim</button>
+        <button id="destBtnAluno" onclick="setTreinoDestino('aluno')" style="flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--text);transition:all .2s">👤 Pro aluno</button>
+      </div>
+      <div id="destAlunoSelect" style="display:none;margin-top:8px">
+        <select id="destAlunoDropdown" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:9px 10px;font-size:12px" onchange="onDestinoAlunoChange()">
+          <option value="">Selecione o aluno...</option>
+        </select>
+        <div id="destAlunoAnamnese" style="margin-top:6px"></div>
       </div>
     </div>
 
@@ -4953,6 +4978,55 @@ function deleteMeuTreino(idx) {
   renderMeusTreinos();
 }
 
+// ——— DESTINO DO TREINO (Pra mim / Pro aluno) ———
+let _treinoDestino = 'eu';
+let _treinoDestinoAlunoId = '';
+
+function setTreinoDestino(dest) {
+  _treinoDestino = dest;
+  const btnEu = document.getElementById('destBtnEu');
+  const btnAl = document.getElementById('destBtnAluno');
+  const sel = document.getElementById('destAlunoSelect');
+  if(dest === 'eu') {
+    btnEu.style.background = '#9c5bff'; btnEu.style.color = '#fff'; btnEu.style.borderColor = '#9c5bff';
+    btnAl.style.background = 'var(--bg)'; btnAl.style.color = 'var(--text)'; btnAl.style.borderColor = 'var(--border)';
+    sel.style.display = 'none';
+    _treinoDestinoAlunoId = '';
+  } else {
+    btnAl.style.background = '#5b8cff'; btnAl.style.color = '#fff'; btnAl.style.borderColor = '#5b8cff';
+    btnEu.style.background = 'var(--bg)'; btnEu.style.color = 'var(--text)'; btnEu.style.borderColor = 'var(--border)';
+    sel.style.display = '';
+    _populateDestinoAlunos();
+  }
+}
+
+function _populateDestinoAlunos(preSelectId) {
+  const dd = document.getElementById('destAlunoDropdown');
+  if(!dd) return;
+  dd.innerHTML = '<option value="">Selecione o aluno...</option>' +
+    students.map(s => `<option value="${s.id}" ${s.id===preSelectId?'selected':''}>${s.name}</option>`).join('');
+  if(preSelectId) { _treinoDestinoAlunoId = preSelectId; onDestinoAlunoChange(); }
+}
+
+function onDestinoAlunoChange() {
+  const dd = document.getElementById('destAlunoDropdown');
+  _treinoDestinoAlunoId = dd?.value || '';
+  const anDiv = document.getElementById('destAlunoAnamnese');
+  if(!anDiv) return;
+  if(!_treinoDestinoAlunoId) { anDiv.innerHTML = ''; return; }
+  const s = students.find(x => x.id === _treinoDestinoAlunoId);
+  anDiv.innerHTML = s ? _anamneseRestricoesWarning(s) : '';
+}
+
+function abrirBuilderProAluno(studentId) {
+  showPage('eu');
+  setTimeout(() => {
+    setTreinoDestino('aluno');
+    _populateDestinoAlunos(studentId);
+    document.getElementById('treinoDestino')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
 let _phdSelGroups=[];
 let _manualTreino=[];
 let _lastPhdExs=[];
@@ -4986,6 +5060,19 @@ function salvarMeuTreino() {
   const input=getMeuTreinoAtivo();
   const txt=input?input.value.trim():'';
   if(!txt){showToast('Escreve o treino primeiro');return;}
+
+  if(_treinoDestino === 'aluno' && _treinoDestinoAlunoId) {
+    const s = students.find(x => x.id === _treinoDestinoAlunoId);
+    if(!s) { showToast('Aluno não encontrado'); return; }
+    const name = prompt('Nome do treino:', 'Treino ' + new Date().toLocaleDateString('pt-BR'));
+    if(name === null) return;
+    s.workouts = s.workouts || [];
+    s.workouts.push({ name: name || 'Sem nome', exercises: txt, startDate: new Date().toISOString().slice(0,10), weeks: 8 });
+    saveStudents();
+    showToast('✅ Treino salvo pro ' + s.name.split(' ')[0] + '!');
+    return;
+  }
+
   const name=prompt('Nome do treino:','Treino '+new Date().toLocaleDateString('pt-BR'));
   if(name===null)return;
   const list=getMeusTreinos();
@@ -8090,6 +8177,14 @@ function showStudentDetail(id) {
 
     <!-- 🛠️ FERRAMENTAS PhD -->
     <div class="section-title" style="margin-top:12px;margin-bottom:10px">🛠️ Ferramentas PhD</div>
+    <button onclick="abrirBuilderProAluno('${s.id}')" style="width:100%;background:linear-gradient(135deg,#1a1a2e,#1a2240);border:1.5px solid #9c5bff60;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:12px">
+      <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#5b8cff,#9c5bff);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎓</div>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#9c5bff">Montar Treino com PhD</div>
+        <div style="font-size:10px;color:var(--text2)">3 modos: IA monta · Manual · Analisar</div>
+      </div>
+      <div style="font-size:18px;color:var(--text3);margin-left:auto">›</div>
+    </button>
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px">
       <button onclick="abrirFerramentaAluno('1rm','${s.id}')" style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px 10px;text-align:left;cursor:pointer;color:var(--text)">
         <div style="font-size:20px">🧮</div>
