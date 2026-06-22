@@ -4864,17 +4864,76 @@ function renderMeusTreinos() {
     el.innerHTML = '<div style="text-align:center;padding:18px;color:var(--text3);font-size:12px;border:1.5px dashed var(--border);border-radius:12px">Nenhum treino salvo ainda</div>';
     return;
   }
-  el.innerHTML = list.map((t,i) => `<div class="card" style="margin-bottom:8px">
+  el.innerHTML = list.map((t,i) => {
+    const expInfo = workoutExpirationInfo(t);
+    const expBadge = expInfo ? `<div style="display:inline-flex;align-items:center;gap:4px;background:${expInfo.bg};color:${expInfo.color};border:1px solid ${expInfo.color}40;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;margin-top:4px">${expInfo.icon} ${expInfo.text}</div>` : '';
+    return `<div class="card" style="margin-bottom:8px">
     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700">${t.name || 'Treino ' + (i+1)}</div>
         <div style="font-size:10px;color:var(--text2)">${new Date(t.createdAt).toLocaleDateString('pt-BR')}</div>
+        ${expBadge}
       </div>
-      <button onclick="deleteMeuTreino(${i})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer">×</button>
+      <button onclick="deleteMeuTreino(${i})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px" title="Excluir">×</button>
     </div>
-    <div style="font-size:11px;color:var(--text);white-space:pre-wrap;line-height:1.6;background:var(--bg);border-radius:8px;padding:8px;font-family:inherit">${t.content}</div>
-    <button onclick="carregarMeuTreino(${i})" style="margin-top:8px;background:var(--card2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">↑ Carregar pra editar</button>
-  </div>`).join('');
+    <div style="font-size:11px;color:var(--text);white-space:pre-wrap;line-height:1.6;background:var(--bg);border-radius:8px;padding:8px;font-family:inherit">${(t.content||'').replace(/</g,'&lt;')}</div>
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button onclick="editarMeuTreino(${i})" style="background:var(--card2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer">✏️ Editar</button>
+      <button onclick="carregarMeuTreino(${i})" style="background:linear-gradient(90deg,#5b8cff22,#9c5bff22);color:#5b8cff;border:1.5px solid #5b8cff40;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer">🎓 Reanalisar</button>
+      <button onclick="shareMeuTreino(${i})" style="background:var(--card2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer">📤 Compartilhar</button>
+      <button onclick="waMeuTreino(${i})" style="background:#22c55e20;color:#22c55e;border:1.5px solid #22c55e40;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer">💬 WhatsApp</button>
+    </div>
+  </div>`}).join('');
+}
+
+function editarMeuTreino(idx) {
+  const list = getMeusTreinos();
+  const t = list[idx];
+  if(!t) return;
+  const el = document.getElementById('meusTreinosList');
+  const cards = el.querySelectorAll('.card');
+  const card = cards[idx];
+  if(!card) return;
+  card.innerHTML = `
+    <input id="editMeuNome_${idx}" value="${(t.name||'').replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg);border:1.5px solid var(--accent);border-radius:8px;color:var(--text);padding:8px 10px;font-size:13px;font-weight:700;font-family:inherit;margin-bottom:6px;box-sizing:border-box">
+    <textarea id="editMeuContent_${idx}" rows="6" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px;font-family:inherit;resize:vertical;line-height:1.5;box-sizing:border-box">${(t.content||'').replace(/</g,'&lt;')}</textarea>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button onclick="salvarEdicaoMeuTreino(${idx})" style="flex:1;background:#4ade80;color:#0f0f1a;border:none;border-radius:8px;padding:9px;font-weight:800;cursor:pointer;font-size:12px">✅ Salvar</button>
+      <button onclick="renderMeusTreinos()" style="flex:1;background:var(--card2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:9px;font-weight:600;cursor:pointer;font-size:12px">Cancelar</button>
+    </div>`;
+  document.getElementById('editMeuNome_'+idx).focus();
+}
+
+function salvarEdicaoMeuTreino(idx) {
+  const list = getMeusTreinos();
+  const nome = document.getElementById('editMeuNome_'+idx)?.value.trim();
+  const content = document.getElementById('editMeuContent_'+idx)?.value.trim();
+  if(!content) { showToast('Treino não pode estar vazio'); return; }
+  list[idx].name = nome || list[idx].name;
+  list[idx].content = content;
+  saveMeusTreinos(list);
+  renderMeusTreinos();
+  showToast('✅ Treino atualizado');
+}
+
+function shareMeuTreino(idx) {
+  const list = getMeusTreinos();
+  const t = list[idx];
+  if(!t) return;
+  const text = '📋 ' + (t.name||'Treino') + '\n\n' + t.content + '\n\n— Feito no NOTCH\n📲 ' + _CS_APP_URL;
+  if(navigator.share) {
+    navigator.share({ title: t.name||'Treino', text }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 Copiado!')).catch(() => showToast('Erro ao copiar'));
+  }
+}
+
+function waMeuTreino(idx) {
+  const list = getMeusTreinos();
+  const t = list[idx];
+  if(!t) return;
+  const text = '📋 *' + (t.name||'Treino') + '*\n\n' + t.content + '\n\n_Feito no NOTCH_ 📲 ' + _CS_APP_URL;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
 function carregarMeuTreino(idx) {
