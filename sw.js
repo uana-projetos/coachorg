@@ -1,4 +1,4 @@
-const CACHE = 'notch-v125';
+const CACHE = 'notch-v126';
 const ASSETS = [
   './manifest.json',
   './apple-touch-icon.png',

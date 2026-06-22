@@ -974,7 +974,12 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       <div class="header-sub" id="headerSub">gestão inteligente fitness</div>
     </div>
   </div>
-  <span id="syncIndicator" title="Sincronizado" style="font-size:14px;opacity:.6;cursor:default"></span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="syncIndicator" title="Sincronizado" style="font-size:14px;opacity:.6;cursor:default"></span>
+    <button onclick="showPage('settings')" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center" title="Configurações">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+  </div>
 </div>
 
 <!-- PAGE: HOME -->
@@ -1201,10 +1206,12 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
             🤖 Analisar com IA
           </button>
           <button onclick="salvarAnamnese()"
-            style="flex:1;background:#4ade80;color:#0f0f1a;border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-size:13px">
+            style="flex:1;background:var(--green);color:#fff;border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-size:13px">
             💾 Salvar
           </button>
         </div>
+        <button onclick="enviarParqWhatsApp()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-size:13px;margin-top:8px">📲 Enviar PAR-Q pro aluno via WhatsApp</button>
+        <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:6px">Envia as perguntas formatadas — aluno responde e você preenche aqui</div>
       </div>
     </div>
   </div>
@@ -1761,13 +1768,15 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
 <!-- PAGE: SETTINGS / COACH IA -->
 <div class="page" id="pageSettings">
 
-  <!-- HEADER: Configurações -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-    <div>
-      <div style="font-size:20px;font-weight:900;letter-spacing:-.3px">⚙️ Configurações</div>
-      <div style="font-size:11px;color:var(--text2);margin-top:2px">Notificações, conta, dados e mais</div>
+  <!-- HEADER: Configurações (Apple-style) -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <button onclick="showPage(_prevPage||'home')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;font-weight:600;padding:0;display:flex;align-items:center;gap:2px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar
+    </button>
+    <div style="flex:1">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.3px">Configurações</div>
     </div>
-    <button onclick="showPage('home')" style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--text2);padding:8px 12px;font-size:11px;cursor:pointer;font-weight:700">‹ Início</button>
   </div>
 
   <!-- META FINANCEIRA (continua aqui, dá pra editar) -->
@@ -1796,15 +1805,8 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     <div style="text-align:center;padding:12px 0;font-size:13px;color:var(--text2)">Carregando...</div>
   </div>
 
-  <!-- 🔔 CONFIGURAÇÕES (colapsável) -->
-  <details class="config-section" style="margin-top:20px">
-    <summary style="cursor:pointer;list-style:none;background:var(--card);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px">
-      <span>⚙️ Configurações</span>
-      <span style="font-size:18px;color:var(--text3);transition:transform .2s" class="config-chevron">▾</span>
-    </summary>
-
-    <div style="margin-top:10px">
-
+  <!-- 🎨 TEMA & CONFIGURAÇÕES -->
+  <div style="margin-top:20px">
       <!-- 🎨 TEMA -->
       <div class="card" style="margin-bottom:10px;cursor:pointer" onclick="abrirTemasSheet()">
         <div style="display:flex;align-items:center;justify-content:space-between">
@@ -1891,8 +1893,7 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
           <div style="font-size:10px;color:var(--text2);margin-top:4px">{nome} {valor} {dia}</div>
         </div>
       </div>
-    </div>
-  </details>
+  </div>
 
   <!-- 📤 COMPARTILHAR (colapsável) -->
   <details class="config-section" style="margin-top:12px">
@@ -3172,7 +3173,10 @@ function showActionToast(msg, actionLabel, actionFn) {
   at._t = setTimeout(()=>{ at.style.transform = 'translateX(-50%) translateY(-200px)'; }, 5000);
 }
 
+let _prevPage = 'home';
 function showPage(name) {
+  const cur = document.querySelector('.page.active');
+  if (cur) { const id = cur.id.replace('page','').toLowerCase(); if (id !== name) _prevPage = id; }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b=>{
@@ -8105,6 +8109,20 @@ function renderParqQuestions(respostas) {
 function setParq(i, val) {
   _parqRespostas[i] = val;
   renderParqQuestions(_parqRespostas);
+}
+
+function enviarParqWhatsApp() {
+  const studentId = document.getElementById('anamneseStudentId').value;
+  const s = students.find(x=>x.id===studentId);
+  if (!s) return;
+  if (!s.phone) { showToast('Aluno sem telefone cadastrado'); return; }
+  const phone = formatPhone(s.phone);
+  const nome = s.name.split(' ')[0];
+  let msg = `📋 *PAR-Q — Questionário de Prontidão*\n\nOi ${nome}! Antes de começar os treinos, preciso que responda essas 7 perguntas com SIM ou NÃO:\n\n`;
+  _PARQ.forEach((q, i) => { msg += `${i+1}. ${q}\n👉 \n\n`; });
+  msg += `Se respondeu SIM pra qualquer uma, avise que preciso do laudo médico antes de montar seu treino.\n\nObrigado! 💪`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  showToast('Abrindo WhatsApp...');
 }
 
 function abrirAnamnese(studentId) {
