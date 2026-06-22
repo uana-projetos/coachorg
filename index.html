@@ -118,40 +118,38 @@ body {
   pointer-events: none;
 }
 .splash-logo {
-  animation: splashLogo .8s cubic-bezier(.34,1.56,.64,1) forwards;
+  position: relative;
+  width: 140px; height: 140px;
+}
+.splash-logo .line-d {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+}
+.splash-logo .code-char {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  pointer-events: none;
+  z-index: 1;
   opacity: 0;
 }
 .splash-name {
   font-size: 44px; font-weight: 100; letter-spacing: 14px;
-  margin-top: 2px;
-  animation: splashFade .6s ease .4s forwards;
+  margin-top: 16px;
   opacity: 0;
+  transform: translateY(10px);
 }
 .splash-name span { color: var(--accent); }
 .splash-slogan {
-  font-size: 15px; color: var(--text2); margin-top: 8px;
+  font-size: 14px; color: var(--text2); margin-top: 10px;
   text-align: center; line-height: 1.5; padding: 0 40px;
-  animation: splashFade .6s ease .7s forwards;
   opacity: 0;
+  transform: translateY(8px);
 }
 .splash-bar {
-  width: 48px; height: 3px; background: var(--accent);
-  border-radius: 4px; margin-top: 32px;
-  animation: splashBar 1.8s ease .9s forwards;
+  width: 44px; height: 2.5px; background: var(--accent);
+  border-radius: 4px; margin-top: 28px;
   transform: scaleX(0); transform-origin: left;
-}
-@keyframes splashLogo {
-  from { opacity:0; transform: scale(.6) translateY(20px); }
-  to   { opacity:1; transform: scale(1) translateY(0); }
-}
-@keyframes splashFade {
-  from { opacity:0; transform: translateY(12px); }
-  to   { opacity:1; transform: translateY(0); }
-}
-@keyframes splashBar {
-  0%   { transform: scaleX(0); }
-  60%  { transform: scaleX(1); }
-  100% { transform: scaleX(1); opacity:.4; }
 }
 @keyframes sessionPop {
   from { opacity:0; transform: translateX(-30px) scaleY(.3); }
@@ -912,19 +910,19 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
 
 <!-- SPLASH SCREEN -->
 <div id="splash">
-  <div class="splash-logo">
-    <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect fill="#060504" width="100" height="100" rx="22"/>
-      <line x1="20" y1="20" x2="20" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="38" y1="20" x2="38" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="56" y1="20" x2="56" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="74" y1="20" x2="74" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="8" y1="86" x2="92" y2="14" stroke="#C44B18" stroke-width="7" stroke-linecap="round"/>
+  <div class="splash-logo" id="splashLogo">
+    <svg id="splashSvg" width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect fill="#060504" width="100" height="100" rx="22" opacity="0.25"/>
+      <line id="spL1" class="line-d" x1="22" y1="20" x2="22" y2="80" stroke="var(--text,#F5F5F7)" stroke-width="7" stroke-linecap="round" style="--len:60" opacity="0"/>
+      <line id="spL2" class="line-d" x1="38" y1="20" x2="38" y2="80" stroke="var(--text,#F5F5F7)" stroke-width="7" stroke-linecap="round" style="--len:60" opacity="0"/>
+      <line id="spL3" class="line-d" x1="54" y1="20" x2="54" y2="80" stroke="var(--text,#F5F5F7)" stroke-width="7" stroke-linecap="round" style="--len:60" opacity="0"/>
+      <line id="spL4" class="line-d" x1="70" y1="20" x2="70" y2="80" stroke="var(--text,#F5F5F7)" stroke-width="7" stroke-linecap="round" style="--len:60" opacity="0"/>
+      <line id="spL5" class="line-d" x1="12" y1="80" x2="84" y2="20" stroke="var(--accent,#C44B18)" stroke-width="7" stroke-linecap="round" style="--len:95" opacity="0"/>
     </svg>
   </div>
-  <div class="splash-name">NOTCH</div>
-  <div class="splash-slogan">gestão inteligente fitness</div>
-  <div class="splash-bar"></div>
+  <div class="splash-name" id="splashName">NOTCH</div>
+  <div class="splash-slogan" id="splashSlogan">gestão inteligente fitness</div>
+  <div class="splash-bar" id="splashBar"></div>
 </div>
 
 <!-- LOGIN WALL -->
@@ -933,11 +931,11 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     <!-- Logo -->
     <svg width="72" height="72" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:16px">
       <rect fill="#060504" width="100" height="100" rx="22"/>
-      <line x1="20" y1="20" x2="20" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
+      <line x1="22" y1="20" x2="22" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
       <line x1="38" y1="20" x2="38" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="56" y1="20" x2="56" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="74" y1="20" x2="74" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="8" y1="86" x2="92" y2="14" stroke="#C44B18" stroke-width="7" stroke-linecap="round"/>
+      <line x1="54" y1="20" x2="54" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
+      <line x1="70" y1="20" x2="70" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
+      <line x1="12" y1="80" x2="84" y2="20" stroke="#C44B18" stroke-width="7" stroke-linecap="round"/>
     </svg>
     <div style="font-size:32px;font-weight:100;color:#fff;letter-spacing:10px;margin-bottom:4px">NOTCH</div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:36px;text-align:center">gestão inteligente fitness</div>
@@ -977,11 +975,11 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
   <div style="display:flex;align-items:center;gap:6px">
     <svg class="logo-icon" width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <rect fill="#060504" width="100" height="100" rx="22"/>
-      <line x1="20" y1="20" x2="20" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
+      <line x1="22" y1="20" x2="22" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
       <line x1="38" y1="20" x2="38" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="56" y1="20" x2="56" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="74" y1="20" x2="74" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
-      <line x1="8" y1="86" x2="92" y2="14" stroke="#C44B18" stroke-width="7" stroke-linecap="round"/>
+      <line x1="54" y1="20" x2="54" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
+      <line x1="70" y1="20" x2="70" y2="80" stroke="#F5F5F7" stroke-width="7" stroke-linecap="round"/>
+      <line x1="12" y1="80" x2="84" y2="20" stroke="#C44B18" stroke-width="7" stroke-linecap="round"/>
     </svg>
     <div>
       <h1>NOTCH</h1>
@@ -8342,18 +8340,147 @@ function formatDateBR(d) {
 
 // INIT
 requestNotifPermission();
-// Splash screen — fica até o auth confirmar (mín 1.2s pra animação)
+// Splash screen — animação Codigo IA
 var _splashEl = document.getElementById('splash');
 var _splashMinDone = false;
 var _authReady = false;
 (function() {
   if(!_splashEl) { _splashMinDone = true; _authReady = true; return; }
-  setTimeout(function() {
-    _splashMinDone = true;
-    if(_authReady) _hideSplash();
-  }, 1200);
-  // Fallback: 6s máximo caso auth trave
-  setTimeout(_hideSplash, 6000);
+
+  var _codeGlyphs = '01αβγδ{}[]<>/:;=+*∑∂∫√∞≈πΩλ';
+  var _liveChars = [];
+  var _logoWrap = document.getElementById('splashLogo');
+  var _logoSvg = document.getElementById('splashSvg');
+  var _spLines = ['spL1','spL2','spL3','spL4','spL5'].map(function(id){return document.getElementById(id)});
+  var _spTitle = document.getElementById('splashName');
+  var _spSub = document.getElementById('splashSlogan');
+  var _spBar = document.getElementById('splashBar');
+
+  function _spCoords(x, y) {
+    var sr = _logoSvg.getBoundingClientRect();
+    var wr = _logoWrap.getBoundingClientRect();
+    var sc = sr.width / 100;
+    return { x: (sr.left - wr.left) + x * sc, y: (sr.top - wr.top) + y * sc };
+  }
+
+  function _spawnChar(tx, ty, hot, delay) {
+    var el = document.createElement('div');
+    el.className = 'code-char';
+    el.textContent = _codeGlyphs[Math.floor(Math.random() * _codeGlyphs.length)];
+    var sx = tx + (Math.random()-0.5)*90;
+    var sy = ty + (Math.random()-0.5)*90;
+    var pos = _spCoords(sx, sy);
+    var tpos = _spCoords(tx, ty);
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C44B18';
+    if (hot) {
+      el.style.color = accent;
+      el.style.textShadow = '0 0 8px ' + accent + '60';
+    } else {
+      var v = 120 + Math.floor(Math.random()*80);
+      el.style.color = 'rgb('+v+','+(v+20)+','+(v+10)+')';
+      el.style.textShadow = '0 0 5px rgba('+v+','+(v+20)+','+(v+10)+',0.3)';
+    }
+    el.style.left = pos.x + 'px';
+    el.style.top = pos.y + 'px';
+    el.style.fontSize = (8 + Math.random()*3) + 'px';
+    _logoWrap.appendChild(el);
+    _liveChars.push({ el:el, sx:pos.x, sy:pos.y, tx:tpos.x, ty:tpos.y, delay:delay, dur:350+Math.random()*250, born:performance.now() });
+  }
+
+  function _updateChars(now) {
+    for (var i = _liveChars.length-1; i >= 0; i--) {
+      var c = _liveChars[i];
+      var elapsed = now - c.born - c.delay;
+      if (elapsed < 0) {
+        c.el.style.opacity = (0.2 + Math.random()*0.25) + '';
+        if (Math.random()>0.6) c.el.textContent = _codeGlyphs[Math.floor(Math.random()*_codeGlyphs.length)];
+        continue;
+      }
+      var p = Math.min(elapsed/c.dur, 1);
+      var ease = 1 - Math.pow(1-p, 3);
+      c.el.style.left = (c.sx+(c.tx-c.sx)*ease) + 'px';
+      c.el.style.top = (c.sy+(c.ty-c.sy)*ease) + 'px';
+      c.el.style.opacity = (0.3 + ease*0.7) + '';
+      if (p < 0.7 && Math.random()>0.75) c.el.textContent = _codeGlyphs[Math.floor(Math.random()*_codeGlyphs.length)];
+    }
+  }
+
+  function _runSplashAnim() {
+    var vertX = [22,38,54,70];
+    for (var vi = 0; vi < 4; vi++) {
+      for (var j = 0; j < 9; j++) {
+        _spawnChar(vertX[vi], 18 + j*7, false, vi*220 + j*25);
+      }
+    }
+    var totalDur = 4*220 + 9*25 + 600;
+    var t0 = performance.now();
+    var lineIdx = 0;
+
+    function phase1(now) {
+      _updateChars(now);
+      var el = now - t0;
+      if (lineIdx < 4 && el > (lineIdx+1)*220 + 380) {
+        _spLines[lineIdx].setAttribute('opacity','1');
+        _spLines[lineIdx].style.transition = 'stroke-dashoffset 0.4s cubic-bezier(0.22,1,0.36,1)';
+        _spLines[lineIdx].style.strokeDashoffset = '0';
+        lineIdx++;
+      }
+      if (el < totalDur) requestAnimationFrame(phase1);
+      else {
+        _liveChars.forEach(function(c){ c.el.style.transition = 'opacity 0.25s'; c.el.style.opacity = '0'; });
+        setTimeout(phase2, 200);
+      }
+    }
+
+    function phase2() {
+      for (var j = 0; j < 14; j++) {
+        var tt = j/13;
+        _spawnChar(12+72*tt, 80-60*tt, true, j*20);
+      }
+      var d0 = performance.now();
+      var dDur = 14*20 + 500;
+      var dRev = false;
+      function step(now) {
+        _updateChars(now);
+        if (!dRev && now-d0 > 250) {
+          dRev = true;
+          _spLines[4].setAttribute('opacity','1');
+          _spLines[4].style.transition = 'stroke-dashoffset 0.5s cubic-bezier(0.22,1,0.36,1)';
+          _spLines[4].style.strokeDashoffset = '0';
+        }
+        if (now-d0 < dDur) requestAnimationFrame(step);
+        else {
+          _liveChars.forEach(function(c){ c.el.style.transition = 'opacity 0.35s'; c.el.style.opacity = '0'; });
+          setTimeout(function(){
+            _liveChars.forEach(function(c){ c.el.remove(); });
+            _liveChars.length = 0;
+          }, 400);
+          setTimeout(phase3, 280);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function phase3() {
+      _spTitle.style.transition = 'opacity 0.5s, transform 0.5s';
+      _spTitle.style.opacity = '1'; _spTitle.style.transform = 'translateY(0)';
+      setTimeout(function(){
+        _spSub.style.transition = 'opacity 0.4s, transform 0.4s';
+        _spSub.style.opacity = '1'; _spSub.style.transform = 'translateY(0)';
+      }, 220);
+      setTimeout(function(){
+        _spBar.style.transition = 'transform 1.2s ease';
+        _spBar.style.transform = 'scaleX(1)';
+      }, 400);
+      _splashMinDone = true;
+      if(_authReady) _hideSplash();
+    }
+
+    requestAnimationFrame(phase1);
+  }
+
+  setTimeout(_runSplashAnim, 150);
+  setTimeout(_hideSplash, 8000);
 })();
 function _hideSplash() {
   if(!_splashEl) return;
@@ -9945,9 +10072,9 @@ window._coachorgIntervals = [
 // Load settings into config fields
 // ——— SISTEMA DE PALETAS ———
 const _PALETAS = {
-  premium: {
-    nome: 'Forja Premium', emoji: '✨',
-    desc: 'Cobre escuro · ouro fosco · luxo máximo',
+  utopia: {
+    nome: 'Utopia', emoji: '✨',
+    desc: 'Cobre escuro · ouro fosco · deserto',
     bg:'#080603', card:'#130C06', card2:'#1C1209', card3:'#261810',
     accent:'#C8781A', accent2:'#7A3E08', accentDim:'#C8781A40', accentGlow:'#C8781A20',
     green:'#1C7B5A', greenDim:'#1C7B5A20', yellow:'#D4952A', orange:'#E8872A', red:'#CC2200',
@@ -9957,30 +10084,30 @@ const _PALETAS = {
     preview: ['#080603','#C8781A','#D4952A','#EDE0C8']
   },
   astroworld: {
-    nome: 'Brasas', emoji: '🔥',
-    desc: 'Laranja queimado · creme quente · energia',
+    nome: 'Astroworld', emoji: '🎡',
+    desc: 'Laranja psicodélico · dourado · carnival',
     bg:'#0A0704', card:'#160D06', card2:'#201308', card3:'#2A190A',
     accent:'#E8722A', accent2:'#7A2D0A', accentDim:'#E8722A40', accentGlow:'#E8722A20',
     green:'#5C8C2E', greenDim:'#5C8C2E20', yellow:'#FFB830', orange:'#FF6B35', red:'#CC2200',
     text:'#F2E5CB', text2:'#A8896A', text3:'#6B5040', border:'#F2E5CB0E', borderStrong:'#F2E5CB1A',
     shadowAccent:'0 6px 28px #E8722A40, 0 2px 8px #E8722A20',
     bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #E8722A18 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #7A2D0A12 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #FF6B3508 0%, transparent 70%)',
-    preview: ['#0A0704','#E8722A','#C4944A','#F2E5CB']
-  },
-  cactus: {
-    nome: 'Cerrado', emoji: '🌵',
-    desc: 'Chocolate · siena · areia premium',
-    bg:'#0C0704', card:'#1A0E05', card2:'#261508', card3:'#32190C',
-    accent:'#D26918', accent2:'#8B4010', accentDim:'#D2691840', accentGlow:'#D2691820',
-    green:'#6B8040', greenDim:'#6B804020', yellow:'#E8A840', orange:'#D87038', red:'#CC2200',
-    text:'#FFDEAD', text2:'#C89C6A', text3:'#8B6840', border:'#FFDEAD0E', borderStrong:'#FFDEAD1A',
-    shadowAccent:'0 6px 28px #D2691840, 0 2px 8px #D2691820',
-    bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #D2691818 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #8B401012 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #F4A46008 0%, transparent 70%)',
-    preview: ['#0C0704','#D26918','#F4A460','#FFDEAD']
+    preview: ['#0A0704','#E8722A','#FFB830','#F2E5CB']
   },
   rodeo: {
-    nome: 'Noturno', emoji: '🌙',
-    desc: 'Roxo profundo · índigo · lavanda',
+    nome: 'Rodeo', emoji: '🤠',
+    desc: 'Carmesim profundo · couro · faroeste',
+    bg:'#0A0404', card:'#180808', card2:'#241010', card3:'#301414',
+    accent:'#CC2B1A', accent2:'#7A1008', accentDim:'#CC2B1A40', accentGlow:'#CC2B1A20',
+    green:'#5A7A3A', greenDim:'#5A7A3A20', yellow:'#D4952A', orange:'#E85030', red:'#CC2200',
+    text:'#F0D8C8', text2:'#A87060', text3:'#6B4038', border:'#F0D8C80E', borderStrong:'#F0D8C81A',
+    shadowAccent:'0 6px 28px #CC2B1A50, 0 2px 8px #CC2B1A25',
+    bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #CC2B1A18 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #7A100812 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #E8503008 0%, transparent 70%)',
+    preview: ['#0A0404','#CC2B1A','#E84830','#F0D8C8']
+  },
+  daysbefore: {
+    nome: 'Days Before', emoji: '🌙',
+    desc: 'Roxo noturno · lean · luzes neon',
     bg:'#060408', card:'#0E0814', card2:'#160C1E', card3:'#1E1228',
     accent:'#9B4CC8', accent2:'#5A1A80', accentDim:'#9B4CC840', accentGlow:'#9B4CC820',
     green:'#3A8A6A', greenDim:'#3A8A6A20', yellow:'#C88ADC', orange:'#A860D8', red:'#E04060',
@@ -9989,16 +10116,27 @@ const _PALETAS = {
     bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #6B2E9A18 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #3A0A6012 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #9B4CC808 0%, transparent 70%)',
     preview: ['#060408','#9B4CC8','#C45CE0','#E8D8F5']
   },
-  birdseye: {
-    nome: 'Atlântico', emoji: '🌊',
-    desc: 'Azul petróleo · aço · laranja sotaque',
+  birdstrap: {
+    nome: 'Birds Trap', emoji: '🌊',
+    desc: 'Azul noturno · metal frio · trap',
     bg:'#030608', card:'#080F14', card2:'#0D1820', card3:'#12222C',
-    accent:'#D4831A', accent2:'#7A4800', accentDim:'#D4831A40', accentGlow:'#D4831A20',
-    green:'#2A7A5A', greenDim:'#2A7A5A20', yellow:'#D4A030', orange:'#D4831A', red:'#EF3040',
+    accent:'#2D7AAA', accent2:'#1A4060', accentDim:'#2D7AAA40', accentGlow:'#2D7AAA20',
+    green:'#2A7A5A', greenDim:'#2A7A5A20', yellow:'#D4A030', orange:'#4A9EC8', red:'#EF3040',
     text:'#C8E0E8', text2:'#6890A0', text3:'#385060', border:'#C8E0E80E', borderStrong:'#C8E0E81A',
-    shadowAccent:'0 6px 28px #D4831A40, 0 2px 8px #D4831A20',
-    bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #2D5A7A18 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #1A304012 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #D4831A08 0%, transparent 70%)',
-    preview: ['#030608','#2D5A7A','#D4831A','#C8E0E8']
+    shadowAccent:'0 6px 28px #2D7AAA40, 0 2px 8px #2D7AAA20',
+    bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #2D5A7A18 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #1A304012 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #4A9EC808 0%, transparent 70%)',
+    preview: ['#030608','#2D7AAA','#4A9EC8','#C8E0E8']
+  },
+  cactusjack: {
+    nome: 'Cactus Jack', emoji: '🌵',
+    desc: 'Mocha · sail · olive · Nike collab',
+    bg:'#0A0604', card:'#14100A', card2:'#1E1810', card3:'#282018',
+    accent:'#8B6040', accent2:'#5A3820', accentDim:'#8B604040', accentGlow:'#8B604020',
+    green:'#6B7A48', greenDim:'#6B7A4820', yellow:'#C8A060', orange:'#A07838', red:'#CC2200',
+    text:'#F5E6D0', text2:'#A89070', text3:'#6B5838', border:'#F5E6D00E', borderStrong:'#F5E6D01A',
+    shadowAccent:'0 6px 28px #8B604050, 0 2px 8px #8B604025',
+    bodyGradient:'radial-gradient(ellipse 80% 40% at 15% 0%, #8B604018 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 100%, #5A382012 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, #6B7A4808 0%, transparent 70%)',
+    preview: ['#0A0604','#8B6040','#6B7A48','#F5E6D0']
   }
 };
 
@@ -10037,7 +10175,7 @@ function aplicarPaleta(nome) {
 function renderPaletaGrid() {
   var lista = document.getElementById('temasLista');
   if(!lista) return;
-  var atual = localStorage.getItem('coachorg_paleta') || 'premium';
+  var atual = localStorage.getItem('coachorg_paleta') || 'utopia';
   lista.innerHTML = Object.keys(_PALETAS).map(function(key) {
     var p = _PALETAS[key];
     var ativo = key === atual;
@@ -10047,7 +10185,7 @@ function renderPaletaGrid() {
     return '<button onclick="aplicarPaleta(\'' + key + '\');fecharTemasSheet()" style="width:100%;background:' + p.bg + ';border:' + (ativo ? '2px solid ' + p.accent : '1.5px solid #ffffff12') + ';border-radius:16px;padding:14px 16px;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:14px">'
       + '<div style="display:flex;gap:4px;flex-shrink:0">' + dots + '</div>'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:14px;font-weight:700;color:' + p.text + ';margin-bottom:2px">' + p.emoji + ' ' + p.nome + (key==='premium' ? ' <span style="font-size:10px;background:' + p.accent + ';color:#000;padding:1px 6px;border-radius:6px;font-weight:900;vertical-align:middle">PRINCIPAL</span>' : '') + '</div>'
+      + '<div style="font-size:14px;font-weight:700;color:' + p.text + ';margin-bottom:2px">' + p.emoji + ' ' + p.nome + (key==='utopia' ? ' <span style="font-size:10px;background:' + p.accent + ';color:#000;padding:1px 6px;border-radius:6px;font-weight:900;vertical-align:middle">PRINCIPAL</span>' : '') + '</div>'
       + '<div style="font-size:11px;color:' + p.text2 + '">' + (p.desc||'') + '</div>'
       + '</div>'
       + (ativo ? '<div style="width:20px;height:20px;border-radius:50%;background:' + p.accent + ';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000;flex-shrink:0">✓</div>' : '')
@@ -10063,7 +10201,7 @@ function renderPaletaGrid() {
 
 document.addEventListener('DOMContentLoaded', ()=>{
   // Carregar paleta salva — padrão: Premium Utopia
-  aplicarPaleta(localStorage.getItem('coachorg_paleta') || 'premium');
+  aplicarPaleta(localStorage.getItem('coachorg_paleta') || 'utopia');
   renderPaletaGrid();
 
   const waMsg = document.getElementById('waTrainMsg');
