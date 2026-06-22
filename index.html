@@ -172,11 +172,12 @@ body {
 .logo-icon .session-bar.b4 { opacity: .2; }
 .header {
   position: sticky; top:0; z-index:100;
-  background: rgba(7,7,15,0.75);
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
   padding: 18px 20px 14px;
-  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  border-bottom: 0.5px solid var(--border);
 }
 .header h1 { font-size:24px; font-weight:800; }
 .header h1 span { color: var(--accent); }
@@ -222,13 +223,14 @@ body {
 
 .tab-bar {
   position:fixed; bottom:0; left:0; right:0; z-index:200;
-  background: rgba(7,7,15,0.72);
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
   display:flex; justify-content:space-around; align-items:center;
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  border-top: 0.5px solid rgba(255,255,255,0.1);
+  border-top: 0.5px solid var(--border);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.2);
 }
 .tab-btn {
   display:flex; flex-direction:column; align-items:center; gap:2px;
@@ -274,20 +276,16 @@ body {
 
 /* Cards */
 .card {
-  background: linear-gradient(145deg, rgba(22,22,46,0.92), rgba(14,14,32,0.85));
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  background: var(--card);
   border-radius: var(--radius);
   padding: 18px;
   margin-bottom: var(--sp-3);
-  border: 1px solid rgba(255,255,255,0.07);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  border: 1px solid var(--border);
+  transition: transform var(--t-base), border-color var(--t-base);
 }
 .card:hover {
-  box-shadow: 0 8px 36px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.09);
-  border-color: rgba(255,255,255,0.11);
-  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
 .card:active { transform: scale(0.98); }
 
@@ -319,44 +317,36 @@ body {
 /* Summary Cards */
 .summary-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
 .summary-card {
-  background: linear-gradient(145deg, rgba(22,22,46,0.9), rgba(14,14,30,0.8));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--card);
   border-radius: var(--radius);
   padding:18px 14px; text-align:center;
-  border:1px solid rgba(255,255,255,0.07);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+  border:1px solid var(--border);
 }
 .summary-card .num { font-size:34px; font-weight:900; line-height:1; letter-spacing:-1px; }
-.summary-card .label { font-size:10px; color:var(--text2); margin-top:7px; text-transform:uppercase; letter-spacing:.8px; font-weight:600; }
+.summary-card .label { font-size:11px; color:var(--text2); margin-top:7px; letter-spacing:.2px; font-weight:500; }
 
 /* Section Title */
 .section-title {
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-bold);
+  font-size: var(--fs-base);
+  font-weight: 600;
   color: var(--text2);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.2px;
   margin-bottom: var(--sp-3);
-  margin-top: 20px;
+  margin-top: 24px;
   padding-left: 2px;
 }
 
 /* Today Schedule */
 .schedule-item {
   display:flex; align-items:center; gap:12px; padding:16px 18px;
-  background: linear-gradient(145deg, rgba(22,22,46,0.88), rgba(14,14,30,0.78));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--card);
   border-radius:var(--radius); margin-bottom:8px;
-  border:1px solid rgba(255,255,255,0.07);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-  transition: transform var(--t-fast), box-shadow var(--t-fast), border-color var(--t-fast);
+  border:1px solid var(--border);
+  transition: transform var(--t-fast), border-color var(--t-fast);
 }
 .schedule-item:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.11);
+  border-color: var(--border-strong);
 }
 .schedule-item.today {
   border-left: 3px solid var(--accent);
@@ -378,15 +368,15 @@ body {
 .fab {
   position:fixed; bottom:90px; right:20px; z-index:150;
   width:56px; height:56px; border-radius:50%;
-  background: linear-gradient(135deg, var(--accent) 0%, #e63050 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
   border:none; color:#fff;
   font-size:28px; cursor:pointer;
-  box-shadow: 0 6px 28px rgba(255,82,82,0.55), 0 2px 8px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-accent);
   display:flex; align-items:center; justify-content:center;
   transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
 }
-.fab:hover { box-shadow: 0 10px 36px rgba(255,82,82,0.65), 0 4px 12px rgba(0,0,0,0.5); }
-.fab:active { transform:scale(.9); box-shadow: 0 3px 14px rgba(255,82,82,0.4); }
+.fab:hover { box-shadow: var(--shadow-accent); transform: scale(1.05); }
+.fab:active { transform:scale(.9); }
 
 /* Modal */
 .modal-overlay {
@@ -396,17 +386,15 @@ body {
 }
 .modal-overlay.show { display:flex; }
 .modal {
-  background: linear-gradient(170deg, rgba(22,22,48,0.97), rgba(10,10,28,0.97));
-  backdrop-filter: blur(32px) saturate(160%);
-  -webkit-backdrop-filter: blur(32px) saturate(160%);
+  background: var(--card);
   border-radius:24px 24px 0 0;
-  border-top: 0.5px solid rgba(255,255,255,0.1);
-  border-left: 0.5px solid rgba(255,255,255,0.07);
-  border-right: 0.5px solid rgba(255,255,255,0.07);
+  border-top: 0.5px solid var(--border-strong);
+  border-left: 0.5px solid var(--border);
+  border-right: 0.5px solid var(--border);
   width:100%; max-width:500px; max-height:90dvh; overflow-y:auto;
   padding:24px 20px max(24px, env(safe-area-inset-bottom));
   animation: slideUp .3s cubic-bezier(.32,.72,0,1);
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
 }
 @keyframes slideUp { from{transform:translateY(100%)} to{transform:none} }
 .modal h2 { font-size:20px; font-weight:800; margin-bottom:20px; }
@@ -983,7 +971,7 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     </svg>
     <div>
       <h1>NOTCH</h1>
-      <div class="header-sub" id="headerSub">Carregando...</div>
+      <div class="header-sub" id="headerSub">gestão inteligente fitness</div>
     </div>
   </div>
   <span id="syncIndicator" title="Sincronizado" style="font-size:14px;opacity:.6;cursor:default"></span>
@@ -1002,21 +990,21 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
   </div>
 
   <div class="summary-row">
-    <div class="summary-card" style="background:linear-gradient(135deg,var(--accent-glow),var(--accent-glow));border-color:var(--accent-glow)">
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
       <div class="num" style="color:var(--accent)" id="totalStudents">0</div>
-      <div class="label">Alunos Ativos</div>
+      <div class="label">Alunos ativos</div>
     </div>
-    <div class="summary-card" style="background:linear-gradient(135deg,#00c85310,#00c85325);border-color:#00c85330">
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
       <div class="num" style="color:var(--green)" id="todayCount">0</div>
-      <div class="label">Treinos Hoje</div>
+      <div class="label">Treinos hoje</div>
     </div>
-    <div class="summary-card" style="background:linear-gradient(135deg,#ff6d0010,#ff6d0025);border-color:#ff6d0030">
-      <div class="num" style="color:var(--orange)" id="pendingPayments">0</div>
-      <div class="label">Pagamentos Pendentes</div>
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
+      <div class="num" style="color:var(--accent)" id="pendingPayments">0</div>
+      <div class="label">Pagamentos pendentes</div>
     </div>
-    <div class="summary-card" style="background:linear-gradient(135deg,#00c85310,#00c85325);border-color:#00c85330">
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
       <div class="num" style="color:var(--green)" id="monthRevenue">R$0</div>
-      <div class="label">Receita Mês</div>
+      <div class="label">Receita do mês</div>
     </div>
   </div>
 
@@ -1098,10 +1086,9 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
 <!-- PAGE: PAYMENTS -->
 <!-- PAGE: EU (Personal) -->
 <div class="page" id="pageEu">
-  <div style="text-align:center;margin-bottom:18px">
-    <div style="font-size:30px">💚</div>
-    <div style="font-size:18px;font-weight:900;letter-spacing:-.3px;margin-top:3px">EU</div>
-    <div style="font-size:11px;color:var(--text2);margin-top:2px">Quem cuida de quem cuida</div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:18px;font-weight:800;letter-spacing:-.3px">Meu bem-estar</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:3px">Quem cuida de quem cuida</div>
   </div>
 
   <!-- Modal: Análise Postural por foto -->
@@ -1645,24 +1632,24 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
 
   <!-- Cards principais do mês -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-    <div class="summary-card" style="background:linear-gradient(135deg,#4ade8010,#4ade8025);border-color:#4ade8030">
-      <div style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.5px">FATURADO</div>
-      <div class="num" style="color:#4ade80;font-size:22px;margin-top:2px" id="finFaturado">R$0</div>
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.3px">Faturado</div>
+      <div class="num" style="color:var(--green);font-size:22px;margin-top:2px" id="finFaturado">R$0</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px" id="finFaturadoSub">0 alunos pagos</div>
     </div>
-    <div class="summary-card" style="background:linear-gradient(135deg,#5b8cff10,#5b8cff25);border-color:#5b8cff30">
-      <div style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.5px">PROJETADO</div>
-      <div class="num" style="color:#5b8cff;font-size:22px;margin-top:2px" id="finProjetado">R$0</div>
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.3px">Projetado</div>
+      <div class="num" style="color:var(--accent);font-size:22px;margin-top:2px" id="finProjetado">R$0</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px" id="finProjetadoSub">se todos pagarem</div>
     </div>
-    <div class="summary-card" style="background:linear-gradient(135deg,var(--accent-glow),var(--accent-glow));border-color:var(--accent-glow)">
-      <div style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.5px">INADIMPLÊNCIA</div>
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.3px">Inadimplência</div>
       <div class="num" style="color:var(--accent);font-size:22px;margin-top:2px" id="finInad">0%</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px" id="finInadSub">R$0 atrasado</div>
     </div>
-    <div class="summary-card" style="background:linear-gradient(135deg,#ffab0010,#ffab0025);border-color:#ffab0030">
-      <div style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.5px">TICKET MÉDIO</div>
-      <div class="num" style="color:#ffab00;font-size:22px;margin-top:2px" id="finTicket">R$0</div>
+    <div class="summary-card" style="background:var(--card);border-color:var(--border)">
+      <div style="font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.3px">Ticket médio</div>
+      <div class="num" style="color:var(--yellow);font-size:22px;margin-top:2px" id="finTicket">R$0</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px" id="finTicketSub">por aluno</div>
     </div>
   </div>
@@ -4969,9 +4956,7 @@ function dismissBetaBanner() {
 function checkBetaBanner() {
   const banner = document.getElementById('betaBanner');
   if(!banner) return;
-  const dismissed = parseInt(localStorage.getItem('coachorg_beta_dismissed') || '0', 10);
-  const hoursAgo = (Date.now() - dismissed) / 3600000;
-  if(dismissed && hoursAgo < 24) { banner.style.display = 'none'; return; }
+  if(localStorage.getItem('coachorg_beta_dismissed')) { banner.style.display = 'none'; return; }
   banner.style.display = 'flex';
 }
 
