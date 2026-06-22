@@ -1658,13 +1658,17 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
     <div id="meuTreinoModos" style="">
       <div style="font-size:12px;color:var(--text2);margin-bottom:10px;text-align:center">O que você vai fazer hoje?</div>
       <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="escolherModoTreino('gerar')" style="background:linear-gradient(90deg,#9c5bff22,#ff6d6d22);border:1.5px solid #9c5bff60;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;color:var(--text)">
+          <div style="font-size:13px;font-weight:800;color:#9c5bff;margin-bottom:2px">⚡ PhD monta pra mim</div>
+          <div style="font-size:11px;color:var(--text2)">Escolha os músculos e a IA monta o treino ideal</div>
+        </button>
+        <button onclick="escolherModoTreino('manual')" style="background:linear-gradient(90deg,#4ade8022,#5b8cff22);border:1.5px solid #4ade8060;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;color:var(--text)">
+          <div style="font-size:13px;font-weight:800;color:#4ade80;margin-bottom:2px">🔧 Montar manual</div>
+          <div style="font-size:11px;color:var(--text2)">Escolha exercício por exercício do banco curado</div>
+        </button>
         <button onclick="escolherModoTreino('analisar')" style="background:linear-gradient(90deg,#5b8cff22,#9c5bff22);border:1.5px solid #5b8cff60;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;color:var(--text)">
           <div style="font-size:13px;font-weight:800;color:#5b8cff;margin-bottom:2px">📋 Já tenho meu treino</div>
           <div style="font-size:11px;color:var(--text2)">Cole o treino e o PhD analisa, corrige e melhora</div>
-        </button>
-        <button onclick="escolherModoTreino('gerar')" style="background:linear-gradient(90deg,#9c5bff22,#ff6d6d22);border:1.5px solid #9c5bff60;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;color:var(--text)">
-          <div style="font-size:13px;font-weight:800;color:#9c5bff;margin-bottom:2px">⚡ Quero que a IA monte</div>
-          <div style="font-size:11px;color:var(--text2)">Descreva o objetivo e o PhD cria um treino completo</div>
         </button>
       </div>
     </div>
@@ -1679,14 +1683,52 @@ details.config-section .config-chevron { transition: transform .2s; display:inli
       <button onclick="validarMeuTreino()" id="meuPhdBtn" style="width:100%;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:14px">🎓 Analisar com Personal PhD</button>
     </div>
 
-    <!-- Modo: gerar treino com IA -->
+    <!-- Modo: PhD monta automaticamente -->
     <div id="meuTreinoModoGerar" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <button onclick="voltarModoTreino()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:0">‹</button>
-        <span style="font-size:13px;font-weight:700;color:#9c5bff">⚡ Montar treino com IA</span>
+        <span style="font-size:13px;font-weight:700;color:#9c5bff">⚡ PhD monta pra mim</span>
       </div>
-      <textarea id="myTreinoInputGerar" placeholder="Descreva o objetivo&#10;Ex: peito e costas 50min hipertrofia intermediário" rows="3" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:12px;resize:vertical;font-family:inherit;margin-bottom:10px"></textarea>
-      <button onclick="gerarMeuTreino()" id="meuGerBtn" style="width:100%;background:linear-gradient(90deg,#9c5bff,#ff6d6d);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:14px">⚡ Gerar e analisar com PhD</button>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600">Grupo(s) muscular</div>
+      <div id="phdGrupoChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:4px">Objetivo</div>
+          <select id="phdGoal" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px"><option value="hipertrofia">Hipertrofia</option><option value="forca">Força</option><option value="resistencia">Resistência</option></select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:4px">Nível</div>
+          <select id="phdLevel" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px"><option value="iniciante">Iniciante</option><option value="intermediario" selected>Intermediário</option><option value="avancado">Avançado</option></select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:4px">Tempo</div>
+          <select id="phdDuration" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="90">90 min</option></select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:4px">Equipamento</div>
+          <select id="phdEquip" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px"><option value="machine">Máquinas (seguro)</option><option value="mix">Mix equilibrado</option><option value="free">Pesos livres</option></select>
+        </div>
+      </div>
+      <button onclick="gerarMeuTreino()" id="meuGerBtn" style="width:100%;background:linear-gradient(90deg,#9c5bff,#ff6d6d);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:14px">⚡ Montar Treino</button>
+    </div>
+
+    <!-- Modo: montar manual -->
+    <div id="meuTreinoModoManual" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button onclick="voltarModoTreino()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:0">‹</button>
+        <span style="font-size:13px;font-weight:700;color:#4ade80">🔧 Montar manual</span>
+      </div>
+      <div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:4px">Grupo muscular</div>
+      <select id="manualGrupoSelect" onchange="renderManualExList()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px;margin-bottom:10px"></select>
+      <div id="manualExList" style="max-height:250px;overflow-y:auto"></div>
+      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:10px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600">Treino montado <span id="manualCount" style="color:#9c5bff"></span></div>
+        <div id="manualTreinoCards" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div id="manualTreinoEmpty" style="font-size:11px;color:var(--text2);text-align:center;padding:16px">Toque nos exercícios acima pra adicionar</div>
+      </div>
+      <button onclick="analisarTreinoManual()" id="manualAnalBtn" disabled style="width:100%;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:800;cursor:pointer;font-size:14px;margin-top:12px;opacity:0.5">🎓 Analisar com PhD</button>
     </div>
 
     <!-- Resultado PhD (aparece após análise) -->
@@ -4429,81 +4471,204 @@ function deleteMeuTreino(idx) {
   renderMeusTreinos();
 }
 
+let _phdSelGroups=[];
+let _manualTreino=[];
+let _lastPhdExs=[];
+
 function escolherModoTreino(modo) {
-  document.getElementById('meuTreinoModos').style.display = 'none';
-  document.getElementById('meuTreinoModoAnalisar').style.display = modo === 'analisar' ? '' : 'none';
-  document.getElementById('meuTreinoModoGerar').style.display = modo === 'gerar' ? '' : 'none';
-  document.getElementById('meuTreinoResult').innerHTML = '';
-  document.getElementById('meuTreinoAcoes').style.display = 'none';
+  document.getElementById('meuTreinoModos').style.display='none';
+  document.getElementById('meuTreinoModoAnalisar').style.display=modo==='analisar'?'':'none';
+  document.getElementById('meuTreinoModoGerar').style.display=modo==='gerar'?'':'none';
+  document.getElementById('meuTreinoModoManual').style.display=modo==='manual'?'':'none';
+  document.getElementById('meuTreinoResult').innerHTML='';
+  document.getElementById('meuTreinoAcoes').style.display='none';
+  if(modo==='gerar'){_phdSelGroups=[];renderPhdChips();}
+  if(modo==='manual'){_manualTreino=[];renderManualGrupoSelect();renderManualTreino();}
 }
 
 function voltarModoTreino() {
-  document.getElementById('meuTreinoModos').style.display = '';
-  document.getElementById('meuTreinoModoAnalisar').style.display = 'none';
-  document.getElementById('meuTreinoModoGerar').style.display = 'none';
-  document.getElementById('meuTreinoResult').innerHTML = '';
-  document.getElementById('meuTreinoAcoes').style.display = 'none';
+  document.getElementById('meuTreinoModos').style.display='';
+  document.getElementById('meuTreinoModoAnalisar').style.display='none';
+  document.getElementById('meuTreinoModoGerar').style.display='none';
+  document.getElementById('meuTreinoModoManual').style.display='none';
+  document.getElementById('meuTreinoResult').innerHTML='';
+  document.getElementById('meuTreinoAcoes').style.display='none';
+  _phdSelGroups=[];_manualTreino=[];_lastPhdExs=[];
 }
 
 function getMeuTreinoAtivo() {
-  const modoGerar = document.getElementById('meuTreinoModoGerar');
-  if(modoGerar && modoGerar.style.display !== 'none') {
-    return document.getElementById('myTreinoInputGerar');
-  }
   return document.getElementById('myTreinoInput');
 }
 
 function salvarMeuTreino() {
-  const input = getMeuTreinoAtivo();
-  const txt = input ? input.value.trim() : '';
-  if(!txt) { showToast('Escreve o treino primeiro'); return; }
-  const name = prompt('Nome do treino:', 'Treino ' + new Date().toLocaleDateString('pt-BR'));
-  if(name === null) return;
-  const list = getMeusTreinos();
-  list.unshift({ name: name || 'Sem nome', content: txt, createdAt: Date.now() });
-  saveMeusTreinos(list);
-  renderMeusTreinos();
-  showToast('💾 Treino salvo');
+  const input=getMeuTreinoAtivo();
+  const txt=input?input.value.trim():'';
+  if(!txt){showToast('Escreve o treino primeiro');return;}
+  const name=prompt('Nome do treino:','Treino '+new Date().toLocaleDateString('pt-BR'));
+  if(name===null)return;
+  const list=getMeusTreinos();
+  list.unshift({name:name||'Sem nome',content:txt,createdAt:Date.now()});
+  saveMeusTreinos(list);renderMeusTreinos();showToast('💾 Treino salvo');
 }
 
-function gerarMeuTreino() {
-  const input = document.getElementById('myTreinoInputGerar');
-  const btn = document.getElementById('meuGerBtn');
-  const result = document.getElementById('meuTreinoResult');
-  const txt = input.value.trim();
-  if(!txt) { showToast('Descreve o objetivo (ex: peito intermediário 45min)'); return; }
-  btn.textContent = '⚡ Gerando...';
-  btn.disabled = true;
-  setTimeout(() => {
-    const cfg = _parsePrompt(txt);
-    const exs = _pickExercises(cfg.groups, cfg.count);
-    const reps = _setsReps(cfg.level, cfg.goal);
-    const title = 'Treino ' + cfg.groups.map(g=>g[0].toUpperCase()+g.slice(1)).join(' + ');
-    const lines = exs.map((ex,i)=>`${i+1}. ${ex.name} — ${reps}`).join('\n');
-    const treinoGerado = title + '\n' + cfg.duration + 'min · ' + cfg.level + ' · ' + cfg.goal + '\n\n' + lines;
+// === PhD CHIPS ===
+const _PHD_GROUPS=[
+  {k:'peito',l:'Peito'},{k:'costas',l:'Costas'},{k:'ombro',l:'Ombro'},
+  {k:'biceps',l:'Bíceps'},{k:'triceps',l:'Tríceps'},
+  {k:'quadriceps',l:'Quadríceps'},{k:'posterior',l:'Posterior'},
+  {k:'gluteo',l:'Glúteo'},{k:'panturrilha',l:'Panturrilha'},{k:'core',l:'Core'}
+];
 
-    // Mostra o treino gerado com opção de editar ANTES de analisar
-    result.innerHTML = `
-      <div style="background:var(--bg);border:1.5px solid #9c5bff40;border-radius:12px;padding:12px;margin-top:8px">
-        <div style="font-size:11px;font-weight:700;color:#9c5bff;margin-bottom:8px">⚡ Treino gerado — revise antes de analisar</div>
-        <textarea id="treinoGeradoPreview" rows="8" style="width:100%;background:transparent;border:none;color:var(--text);font-size:12px;resize:vertical;font-family:inherit;line-height:1.7;outline:none">${treinoGerado}</textarea>
-        <button onclick="confirmarEAnalisarTreino()" style="width:100%;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:13px;margin-top:8px">🎓 Está bom — analisar com PhD</button>
+function togglePhdGrupo(key){
+  const i=_phdSelGroups.indexOf(key);
+  if(i>=0)_phdSelGroups.splice(i,1);else _phdSelGroups.push(key);
+  renderPhdChips();
+}
+
+function renderPhdChips(){
+  const el=document.getElementById('phdGrupoChips');if(!el)return;
+  el.innerHTML=_PHD_GROUPS.map(g=>{
+    const on=_phdSelGroups.includes(g.k);
+    return `<button onclick="togglePhdGrupo('${g.k}')" style="padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;border:1.5px solid ${on?'var(--accent)':'var(--border)'};background:${on?'color-mix(in srgb,var(--accent) 15%,transparent)':'var(--bg)'};color:${on?'var(--accent)':'var(--text2)'}">${g.l}</button>`;
+  }).join('');
+}
+
+// === PhD GERAR ===
+function gerarMeuTreino(){
+  if(!_phdSelGroups.length){showToast('Seleciona pelo menos 1 grupo muscular');return;}
+  const goal=document.getElementById('phdGoal').value;
+  const level=document.getElementById('phdLevel').value;
+  const duration=parseInt(document.getElementById('phdDuration').value);
+  const equip=document.getElementById('phdEquip').value;
+  const count=duration<=30?4:duration<=45?5:duration<=60?7:8;
+  const btn=document.getElementById('meuGerBtn');
+  const result=document.getElementById('meuTreinoResult');
+  btn.textContent='⚡ Montando...';btn.disabled=true;
+  setTimeout(()=>{
+    const exs=_pickExercisesSmart(_phdSelGroups,count,level,equip);
+    const reps=_setsReps(level,goal);
+    _lastPhdExs=exs;
+    const title=_phdSelGroups.map(g=>g[0].toUpperCase()+g.slice(1)).join(' + ');
+    let html=`<div style="background:var(--bg);border:1.5px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;padding:12px;margin-top:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:10px">⚡ ${title} · ${duration}min · ${level}</div>`;
+    exs.forEach((ex,i)=>{
+      const tc=_TYPE_COLOR[ex.type]||'#888';
+      html+=`<div id="phdEx${i}" style="display:flex;align-items:center;gap:8px;padding:9px 0;${i<exs.length-1?'border-bottom:1px solid var(--border)':''}">
+        <span style="font-size:12px;font-weight:700;color:var(--text2);width:20px">${i+1}.</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--text)">${ex.name}</div>
+          <div style="font-size:10px;color:var(--text2)">${reps} · <span style="color:${tc};font-weight:700">${_TYPE_LABEL[ex.type]}</span>${ex.compound?' · Composto':''}</div>
+        </div>
+        <button onclick="swapPhdEx(${i})" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:12px" title="Trocar exercício">🔄</button>
       </div>`;
-
-    btn.textContent = '⚡ Gerar outro';
-    btn.disabled = false;
-  }, 500);
+    });
+    html+=`<button onclick="confirmarEAnalisarTreino()" style="width:100%;background:linear-gradient(90deg,#5b8cff,#9c5bff);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:13px;margin-top:12px">🎓 Tá bom — analisar com PhD</button></div>`;
+    result.innerHTML=html;
+    btn.textContent='⚡ Montar outro';btn.disabled=false;
+  },400);
 }
 
-function confirmarEAnalisarTreino() {
-  const preview = document.getElementById('treinoGeradoPreview');
-  if(!preview) return;
-  const inputAnalisar = document.getElementById('myTreinoInput');
-  inputAnalisar.value = preview.value;
-  // Muda pro modo analisar e executa
-  document.getElementById('meuTreinoModoGerar').style.display = 'none';
-  document.getElementById('meuTreinoModoAnalisar').style.display = '';
-  document.getElementById('meuTreinoResult').innerHTML = '';
+function swapPhdEx(idx){
+  const ex=_lastPhdExs[idx];if(!ex)return;
+  const db=_PHD_DB[ex.group]||[];
+  const curIdx=db.findIndex(e=>e.n===ex.name);
+  const usedNames=_lastPhdExs.map(e=>e.name);
+  let nextIdx=(curIdx+1)%db.length,tries=0;
+  while(usedNames.includes(db[nextIdx].n)&&tries<db.length){nextIdx=(nextIdx+1)%db.length;tries++;}
+  if(tries>=db.length){showToast('Sem mais opções nesse grupo');return;}
+  const nw=db[nextIdx];
+  _lastPhdExs[idx]={group:ex.group,name:nw.n,type:nw.t,compound:nw.c};
+  const card=document.getElementById('phdEx'+idx);
+  if(card){
+    const goal=document.getElementById('phdGoal')?.value||'hipertrofia';
+    const level=document.getElementById('phdLevel')?.value||'intermediario';
+    const reps=_setsReps(level,goal);const tc=_TYPE_COLOR[nw.t]||'#888';
+    card.querySelector('div>div:first-child').textContent=nw.n;
+    card.querySelector('div>div:last-child').innerHTML=`${reps} · <span style="color:${tc};font-weight:700">${_TYPE_LABEL[nw.t]}</span>${nw.c?' · Composto':''}`;
+  }
+  showToast('🔄 '+nw.n);
+}
+
+function confirmarEAnalisarTreino(){
+  if(!_lastPhdExs.length)return;
+  const goal=document.getElementById('phdGoal')?.value||'hipertrofia';
+  const level=document.getElementById('phdLevel')?.value||'intermediario';
+  const reps=_setsReps(level,goal);
+  const txt=_lastPhdExs.map((e,i)=>`${i+1}. ${e.name} — ${reps}`).join('\n');
+  document.getElementById('myTreinoInput').value=txt;
+  document.getElementById('meuTreinoModoGerar').style.display='none';
+  document.getElementById('meuTreinoModoAnalisar').style.display='';
+  document.getElementById('meuTreinoResult').innerHTML='';
+  validarMeuTreino();
+}
+
+// === MODO MANUAL ===
+function renderManualGrupoSelect(){
+  const sel=document.getElementById('manualGrupoSelect');if(!sel)return;
+  sel.innerHTML='<option value="">Selecione o grupo...</option>'+_PHD_GROUPS.map(g=>`<option value="${g.k}">${g.l}</option>`).join('');
+}
+
+function renderManualExList(){
+  const grupo=document.getElementById('manualGrupoSelect').value;
+  const c=document.getElementById('manualExList');
+  if(!grupo||!c){if(c)c.innerHTML='';return;}
+  const db=_PHD_DB[grupo]||[];
+  const addedNames=_manualTreino.map(e=>e.name);
+  c.innerHTML=db.map(ex=>{
+    const added=addedNames.includes(ex.n);const tc=_TYPE_COLOR[ex.t]||'#888';
+    return `<button onclick="addManualEx('${grupo}','${ex.n.replace(/'/g,"\\'")}','${ex.t}',${ex.c})" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 10px;background:${added?'color-mix(in srgb,var(--accent) 8%,transparent)':'var(--bg)'};border:1px solid ${added?'color-mix(in srgb,var(--accent) 30%,transparent)':'var(--border)'};border-radius:8px;margin-bottom:4px;cursor:pointer;color:var(--text)" ${added?'disabled':''}>
+      <span style="font-size:14px;color:${added?'#4ade80':'var(--accent)'}">${added?'✓':'+'}</span>
+      <span style="flex:1;font-size:12px;font-weight:600">${ex.n}</span>
+      ${ex.c?'<span style="font-size:8px;padding:2px 5px;border-radius:3px;background:#ffffff15;color:var(--text2);font-weight:700">COMP</span>':''}
+      <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:color-mix(in srgb,${tc} 15%,transparent);color:${tc};font-weight:700">${_TYPE_LABEL[ex.t]}</span>
+    </button>`;
+  }).join('');
+}
+
+function addManualEx(grupo,name,type,compound){
+  if(_manualTreino.find(e=>e.name===name))return;
+  _manualTreino.push({group:grupo,name,type,compound});
+  renderManualTreino();renderManualExList();
+}
+
+function removeManualEx(idx){
+  _manualTreino.splice(idx,1);
+  renderManualTreino();renderManualExList();
+}
+
+function renderManualTreino(){
+  const c=document.getElementById('manualTreinoCards');
+  const empty=document.getElementById('manualTreinoEmpty');
+  const btn=document.getElementById('manualAnalBtn');
+  const cnt=document.getElementById('manualCount');
+  if(!_manualTreino.length){
+    if(c)c.innerHTML='';if(empty)empty.style.display='';
+    if(btn){btn.disabled=true;btn.style.opacity='0.5';}
+    if(cnt)cnt.textContent='';return;
+  }
+  if(empty)empty.style.display='none';
+  if(btn){btn.disabled=false;btn.style.opacity='1';}
+  if(cnt)cnt.textContent='('+_manualTreino.length+')';
+  c.innerHTML=_manualTreino.map((ex,i)=>{
+    const tc=_TYPE_COLOR[ex.type]||'#888';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px">
+      <span style="font-size:12px;font-weight:700;color:var(--text2)">${i+1}.</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--text)">${ex.name}</div>
+        <div style="font-size:10px;color:${tc};font-weight:600">${_TYPE_LABEL[ex.type]}</div>
+      </div>
+      <button onclick="removeManualEx(${i})" style="background:none;border:none;color:#ff6d6d;cursor:pointer;font-size:16px;padding:2px 6px">×</button>
+    </div>`;
+  }).join('');
+}
+
+function analisarTreinoManual(){
+  if(!_manualTreino.length)return;
+  const txt=_manualTreino.map((ex,i)=>`${i+1}. ${ex.name} — 4x10-12`).join('\n');
+  document.getElementById('myTreinoInput').value=txt;
+  document.getElementById('meuTreinoModoManual').style.display='none';
+  document.getElementById('meuTreinoModoAnalisar').style.display='';
+  document.getElementById('meuTreinoResult').innerHTML='';
   validarMeuTreino();
 }
 
@@ -7702,23 +7867,75 @@ function deleteStudent() {
   showPage('students');
 }
 
-// WORKOUTS
-const _EXERCISES = {
-  peito: ['Supino reto barra','Supino inclinado halter','Crucifixo banco inclinado','Crossover polia','Peck deck','Flexão de braço','Supino declinado','Pullover halter'],
-  costas: ['Puxada frente pegada aberta','Remada curvada barra','Remada baixa cabo','Remada cavalinho','Pulldown unilateral','Levantamento terra','Pull-down corda','Barra fixa assistida'],
-  ombro: ['Desenvolvimento halter','Elevação lateral','Elevação frontal halter','Encolhimento','Crucifixo invertido','Arnold press','Face pull','Remada alta'],
-  biceps: ['Rosca direta barra','Rosca alternada halter','Rosca martelo','Rosca Scott','Rosca concentrada','Rosca 21','Rosca cabo W'],
-  triceps: ['Tríceps testa barra W','Tríceps polia corda','Tríceps francês unilateral','Tríceps mergulho banco','Tríceps coice','Tríceps polia barra reta','Extensão tríceps overhead'],
-  pernas: ['Agachamento livre','Leg press 45°','Cadeira extensora','Stiff halter','Mesa flexora','Avanço alternado','Cadeira flexora unilateral','Agachamento búlgaro','Panturrilha em pé'],
-  quadriceps: ['Agachamento livre','Leg press 45°','Cadeira extensora','Hack machine','Avanço alternado','Agachamento sumô'],
-  posterior: ['Stiff halter','Mesa flexora','Cadeira flexora unilateral','Bom dia barra','Levantamento terra romeno'],
-  gluteo: ['Hip thrust barra','Agachamento sumô','Elevação pélvica unilateral','Cadeira abdutora','Glúteo coice polia','Avanço passada','Stiff halter'],
-  panturrilha: ['Panturrilha em pé máquina','Panturrilha sentado','Panturrilha unilateral halter','Burrinho no leg press'],
-  core: ['Prancha frontal','Prancha lateral','Abdominal canivete','Abdominal infra na barra','Russian twist','Hollow body hold','Dead bug'],
-  abdomen: ['Prancha frontal','Abdominal supra','Abdominal infra','Bicicleta no chão','Prancha lateral','Russian twist'],
-  cardio: ['Esteira 12% incl 5min','Bike 10min ritmo médio','Polichinelo 3x30s','Burpee 4x10','Corda 4x40s','Escada 6min'],
-  funcional: ['Burpee','Agachamento com salto','Mountain climber','Polichinelo','Prancha alternada','Goblet squat']
+// WORKOUTS — banco curado: {n:nome, t:tipo(M=máquina,C=cabo,L=livre,B=corpo), c:composto}
+// Ordenados por segurança+eficácia: máquinas primeiro, depois cabo, depois livre
+const _PHD_DB = {
+  peito:[
+    {n:'Supino reto máquina',t:'M',c:true},{n:'Supino inclinado máquina',t:'M',c:true},
+    {n:'Peck deck',t:'M',c:false},{n:'Crossover polia alta',t:'C',c:false},
+    {n:'Crossover polia baixa',t:'C',c:false},{n:'Supino inclinado halter',t:'L',c:true},
+    {n:'Supino reto halter',t:'L',c:true},{n:'Crucifixo inclinado halter',t:'L',c:false},
+    {n:'Flexão de braço',t:'B',c:true}],
+  costas:[
+    {n:'Puxada frente aberta',t:'C',c:true},{n:'Remada cavalinho',t:'M',c:true},
+    {n:'Remada baixa triângulo',t:'C',c:true},{n:'Remada máquina',t:'M',c:true},
+    {n:'Puxada triângulo',t:'C',c:true},{n:'Pulldown unilateral cabo',t:'C',c:false},
+    {n:'Pull-down corda',t:'C',c:false},{n:'Remada unilateral halter',t:'L',c:true},
+    {n:'Remada curvada halter',t:'L',c:true}],
+  ombro:[
+    {n:'Desenvolvimento máquina',t:'M',c:true},{n:'Crucifixo invertido máquina',t:'M',c:false},
+    {n:'Elevação lateral cabo',t:'C',c:false},{n:'Face pull',t:'C',c:false},
+    {n:'Elevação lateral halter',t:'L',c:false},{n:'Desenvolvimento halter sentado',t:'L',c:true},
+    {n:'Encolhimento halter',t:'L',c:false},{n:'Elevação frontal halter',t:'L',c:false}],
+  biceps:[
+    {n:'Rosca Scott máquina',t:'M',c:false},{n:'Rosca cabo barra W',t:'C',c:false},
+    {n:'Rosca cabo corda martelo',t:'C',c:false},{n:'Rosca direta barra W',t:'L',c:false},
+    {n:'Rosca alternada halter',t:'L',c:false},{n:'Rosca martelo halter',t:'L',c:false},
+    {n:'Rosca concentrada',t:'L',c:false}],
+  triceps:[
+    {n:'Tríceps polia corda',t:'C',c:false},{n:'Tríceps polia barra reta',t:'C',c:false},
+    {n:'Tríceps polia unilateral',t:'C',c:false},{n:'Extensão tríceps máquina',t:'M',c:false},
+    {n:'Tríceps testa barra W',t:'L',c:false},{n:'Tríceps francês halter',t:'L',c:false}],
+  quadriceps:[
+    {n:'Leg press 45°',t:'M',c:true},{n:'Hack machine',t:'M',c:true},
+    {n:'Cadeira extensora',t:'M',c:false},{n:'Agachamento Smith',t:'M',c:true},
+    {n:'Leg press horizontal',t:'M',c:true},{n:'Avanço Smith',t:'M',c:true},
+    {n:'Agachamento livre',t:'L',c:true},{n:'Agachamento sumô halter',t:'L',c:true}],
+  posterior:[
+    {n:'Mesa flexora',t:'M',c:false},{n:'Cadeira flexora',t:'M',c:false},
+    {n:'Stiff halter',t:'L',c:true},{n:'Levantamento terra romeno',t:'L',c:true}],
+  gluteo:[
+    {n:'Cadeira abdutora',t:'M',c:false},{n:'Glúteo máquina kick back',t:'M',c:false},
+    {n:'Hip thrust Smith',t:'M',c:true},{n:'Glúteo coice polia',t:'C',c:false},
+    {n:'Elevação pélvica',t:'B',c:true},{n:'Agachamento sumô halter',t:'L',c:true}],
+  panturrilha:[
+    {n:'Panturrilha em pé máquina',t:'M',c:false},{n:'Panturrilha sentado máquina',t:'M',c:false},
+    {n:'Panturrilha no leg press',t:'M',c:false}],
+  core:[
+    {n:'Abdominal máquina',t:'M',c:false},{n:'Prancha frontal',t:'B',c:true},
+    {n:'Prancha lateral',t:'B',c:false},{n:'Abdominal infra banco',t:'B',c:false},
+    {n:'Abdominal supra',t:'B',c:false},{n:'Russian twist',t:'B',c:false}],
+  pernas:[
+    {n:'Leg press 45°',t:'M',c:true},{n:'Hack machine',t:'M',c:true},
+    {n:'Cadeira extensora',t:'M',c:false},{n:'Mesa flexora',t:'M',c:false},
+    {n:'Panturrilha em pé máquina',t:'M',c:false},{n:'Agachamento Smith',t:'M',c:true},
+    {n:'Stiff halter',t:'L',c:true},{n:'Cadeira abdutora',t:'M',c:false}],
+  abdomen:[
+    {n:'Abdominal máquina',t:'M',c:false},{n:'Prancha frontal',t:'B',c:true},
+    {n:'Abdominal infra',t:'B',c:false},{n:'Abdominal supra',t:'B',c:false},
+    {n:'Prancha lateral',t:'B',c:false},{n:'Russian twist',t:'B',c:false}],
+  cardio:[
+    {n:'Esteira inclinada 12% 5min',t:'M',c:false},{n:'Bike 10min ritmo médio',t:'M',c:false},
+    {n:'Escada 6min',t:'M',c:false},{n:'Polichinelo 3x30s',t:'B',c:false},
+    {n:'Corda 4x40s',t:'B',c:false}],
+  funcional:[
+    {n:'Goblet squat',t:'L',c:true},{n:'Agachamento com salto',t:'B',c:true},
+    {n:'Mountain climber',t:'B',c:false},{n:'Prancha alternada',t:'B',c:false},
+    {n:'Burpee',t:'B',c:true}]
 };
+const _EXERCISES={};for(const g in _PHD_DB)_EXERCISES[g]=_PHD_DB[g].map(e=>e.n);
+const _TYPE_LABEL={M:'Máq',C:'Cabo',L:'Livre',B:'Corpo'};
+const _TYPE_COLOR={M:'#5b8cff',C:'#9c5bff',L:'#ff6d6d',B:'#4ade80'};
 
 function _parsePrompt(p) {
   const s = p.toLowerCase();
@@ -7763,19 +7980,34 @@ function _parsePrompt(p) {
 }
 
 function _pickExercises(groups, count) {
-  const pool = [];
-  const perGroup = Math.max(2, Math.ceil(count/groups.length));
-  for(const g of groups) {
-    const list = (_EXERCISES[g]||[]).slice();
-    list.sort(()=>Math.random()-0.5);
-    pool.push(...list.slice(0,perGroup).map(ex=>({group:g, name:ex})));
+  return _pickExercisesSmart(groups, count, 'intermediario', 'machine');
+}
+
+function _sortByPref(db, level, equipPref) {
+  const order = equipPref==='free'?{L:1,C:2,M:3,B:4}:equipPref==='mix'?{M:1,C:1,L:2,B:3}:{M:1,C:2,L:3,B:4};
+  if(level==='iniciante') return db.slice().sort((a,b)=>(a.t==='M'?1:a.t==='C'?2:4)-(b.t==='M'?1:b.t==='C'?2:4));
+  return db.slice().sort((a,b)=>(order[a.t]||9)-(order[b.t]||9));
+}
+
+function _pickExercisesSmart(groups, count, level, equipPref) {
+  const result=[];
+  const perGroup=Math.max(2,Math.ceil(count/groups.length));
+  for(const g of groups){
+    const db=(_PHD_DB[g]||[]);if(!db.length)continue;
+    const sorted=_sortByPref(db,level,equipPref||'machine');
+    const picked=[];
+    const comp=sorted.find(e=>e.c);
+    if(comp)picked.push(comp);
+    if(level==='avancado'&&perGroup>=3){const s=sorted.find(e=>e.c&&e!==comp);if(s)picked.push(s);}
+    for(const ex of sorted){if(picked.length>=perGroup)break;if(!picked.includes(ex))picked.push(ex);}
+    result.push(...picked.map(ex=>({group:g,name:ex.n,type:ex.t,compound:ex.c})));
   }
-  return pool.slice(0,count);
+  return result.slice(0,count);
 }
 
 function _setsReps(level, goal) {
-  if(goal==='força') return level==='avancado' ? '4x4-6 (3min desc)' : '4x6-8 (2min desc)';
-  if(goal==='resistência') return '3x15-20 (45s desc)';
+  if(goal==='força'||goal==='forca') return level==='avancado' ? '4x4-6 (3min desc)' : '4x6-8 (2min desc)';
+  if(goal==='resistência'||goal==='resistencia') return '3x15-20 (45s desc)';
   if(level==='iniciante') return '3x12-15 (60s desc)';
   if(level==='avancado') return '4x8-10 (90s desc)';
   return '4x10-12 (75s desc)';
